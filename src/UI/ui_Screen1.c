@@ -6,7 +6,9 @@
 #include "ui.h"
 
 lv_obj_t * ui_Screen1 = NULL;
-lv_obj_t * ui_Spinner1 = NULL;
+lv_obj_t * ui_Arc1 = NULL;
+lv_obj_t * ui_Label7 = NULL;
+lv_obj_t * ui_Label8 = NULL;
 // event funtions
 
 // build funtions
@@ -16,13 +18,27 @@ void ui_Screen1_screen_init(void)
     ui_Screen1 = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Spinner1 = lv_spinner_create(ui_Screen1, 1000, 90);
-    lv_obj_set_width(ui_Spinner1, 80);
-    lv_obj_set_height(ui_Spinner1, 80);
-    lv_obj_set_x(ui_Spinner1, -5);
-    lv_obj_set_y(ui_Spinner1, -8);
-    lv_obj_set_align(ui_Spinner1, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_Spinner1, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    ui_Arc1 = lv_arc_create(ui_Screen1);
+    lv_obj_set_width(ui_Arc1, 94);
+    lv_obj_set_height(ui_Arc1, 97);
+    lv_obj_set_x(ui_Arc1, -1);
+    lv_obj_set_y(ui_Arc1, 4);
+    lv_obj_set_align(ui_Arc1, LV_ALIGN_CENTER);
+    lv_arc_set_value(ui_Arc1, 50);
+
+    ui_Label7 = lv_label_create(ui_Screen1);
+    lv_obj_set_width(ui_Label7, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label7, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label7, 2);
+    lv_obj_set_y(ui_Label7, 65);
+    lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label7, "Humidade\n			Solo");
+
+    ui_Label8 = lv_label_create(ui_Screen1);
+    lv_obj_set_width(ui_Label8, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label8, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label8, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label8, "Value%");
 
 }
 
@@ -32,6 +48,8 @@ void ui_Screen1_screen_destroy(void)
 
     // NULL screen variables
     ui_Screen1 = NULL;
-    ui_Spinner1 = NULL;
+    ui_Arc1 = NULL;
+    ui_Label7 = NULL;
+    ui_Label8 = NULL;
 
 }

@@ -28,13 +28,14 @@ extern "C" {
 ///////////////////// SCREENS ////////////////////
 
 #include "ui_Screen1.h"
+#include "ui_Screen2.h"
 
 ///////////////////// VARIABLES ////////////////////
 
+extern lv_anim_t * ald_Animation(lv_obj_t * TargetObject, int delay);
 
 // EVENTS
 
-void ui_event____initial_actions0(lv_event_t * e);
 extern lv_obj_t * ui____initial_actions0;
 
 // UI INIT

@@ -1,0 +1,5 @@
+Sensor de humidade do solo:
+    0 min - 2850 max
+
+    Nas condições de operação:
+    0 min - (por medir) max
