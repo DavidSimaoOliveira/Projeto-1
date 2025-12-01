@@ -8,7 +8,7 @@
 #define BUTTON_1 19
 #define BUTTON_2 20
 
-#define potPin 1
+#define Sensor_Solo 1
 
 unsigned long currentMillis;
 unsigned long lastMillis = 0;
@@ -34,6 +34,11 @@ void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
     lv_disp_flush_ready(disp);
 }
 
+/*void indev_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
+{
+}
+*/
+
 void ticks()
 {
     currentMillis = millis();
@@ -46,7 +51,20 @@ void checkValues()
 {
 }
 
-void indev_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
+void update_Screen()
+{
+    if (digitalRead(BUTTON_1) == LOW)
+    {
+        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+        Serial.println("1");
+    }
+    if (digitalRead(BUTTON_2) == LOW)
+    {
+        _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+        Serial.println("2");
+    }
+}
+void update_ScreenValues()
 {
 }
 
@@ -76,7 +94,7 @@ void setup()
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     indev_drv.type = LV_INDEV_TYPE_KEYPAD;
-    indev_drv.read_cb = indev_read;
+    // indev_drv.read_cb = indev_read;
     lv_disp_drv_register(&disp_drv);
 
     ui_init();
@@ -84,29 +102,26 @@ void setup()
     pinMode(BUTTON_1, INPUT_PULLUP);
     pinMode(BUTTON_2, INPUT_PULLUP);
 
-    pinMode(potPin, INPUT);
+    pinMode(Sensor_Solo, INPUT);
 
     Serial.println("Sup, estou a funcionar");
     lv_scr_load(ui_Screen2);
 }
 
+int lastSoloCheck = millis();
+#define SoloCheckIntervalo
+int lastTempCheck = millis();
+#define TempCheckIntervalo
+int lastAirCheck = millis();
+#define AirCheckIntervalo
+
 void loop()
 {
-
     ticks();
-
     lv_timer_handler();
 
-    if (digitalRead(BUTTON_1) == LOW)
-    {
-        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        Serial.println("1");
-    }
-    if (digitalRead(BUTTON_2) == LOW)
-    {
-        _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        Serial.println("2");
-    }
+    update_ScreenValues();
+    update_Screen();
 
-    delay(5);
+    delay(1000 / 60);
 }
