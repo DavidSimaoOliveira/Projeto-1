@@ -27,12 +27,12 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
-#include "ui_Screen1.h"
-#include "ui_Screen2.h"
+#include "ui_Humidade_Solo_Screen.h"
+#include "ui_Ar_Screen.h"
+#include "ui_Home_Screen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
-extern lv_anim_t * ald_Animation(lv_obj_t * TargetObject, int delay);
 
 // EVENTS
 

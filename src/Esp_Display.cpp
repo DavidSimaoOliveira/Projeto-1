@@ -10,8 +10,14 @@
 
 #define Sensor_Solo 1
 
-unsigned long currentMillis;
-unsigned long lastMillis = 0;
+#define MIN_VALUE_HUMIDADE_SOLO
+#define MAX_VALUE_HUMIDADE_SOLO
+
+#define MIN_VALUE_HUMIDADE_AR
+#define MAX_VALUE_HUMIDADE_AR
+
+#define MIN_VALUE_QUANTIDADE_AGUA
+#define MAX_VALUE_QUANTIDADE_AGUA
 
 LGFX display;
 
@@ -39,6 +45,9 @@ void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
 }
 */
 
+unsigned long currentMillis;
+unsigned long lastMillis = 0;
+
 void ticks()
 {
     currentMillis = millis();
@@ -47,25 +56,68 @@ void ticks()
     lastMillis = currentMillis;
 }
 
+int humidadeSolo;
+float tempAr;
+int humidadeAr;
+int quantidadeAgua;
+
 void checkValues()
 {
+    humidadeAr = measureHumidadeAr();
+    humidadeSolo = measureHumidadeSolo();
+    tempAr = measureTempAr();
+}
+
+int measureHumidadeSolo()
+{
+    int value;
+
+    int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
+
+    return resultado;
+}
+
+float measureTempAr()
+{
+    int value;
+
+    return value;
+}
+
+int measureHumidadeAr()
+{
+    int value;
+
+    int resultado = (value, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+
+    return resultado;
+}
+
+int measureQuantidadeAgua()
+{
+    int value;
+
+    int resultado = (value, MIN_VALUE_QUANTIDADE_AGUA, MAX_VALUE_QUANTIDADE_AGUA, 0, 100);
+
+    return resultado;
 }
 
 void update_Screen()
 {
     if (digitalRead(BUTTON_1) == LOW)
     {
-        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        Serial.println("1");
+        _ui_screen_change(&ui_Humidade_Solo_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
     }
     if (digitalRead(BUTTON_2) == LOW)
     {
-        _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        Serial.println("2");
+        _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
     }
 }
 void update_ScreenValues()
 {
+    lv_label_set_text_fmt(ui_HumidadeSolo, "%g %", humidadeSolo);
+    lv_label_set_text_fmt(ui_HumidadeAr, "%g %", humidadeAr);
+    lv_label_set_text_fmt(ui_TempAr, "%g %", tempAr);
 }
 
 void setup()
@@ -105,7 +157,7 @@ void setup()
     pinMode(Sensor_Solo, INPUT);
 
     Serial.println("Sup, estou a funcionar");
-    lv_scr_load(ui_Screen2);
+    lv_scr_load(ui_Home_Screen);
 }
 
 int lastSoloCheck = millis();

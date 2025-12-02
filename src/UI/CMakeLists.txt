@@ -1,5 +1,6 @@
-SET(SOURCES ui_Screen1.c
-    ui_Screen2.c
+SET(SOURCES ui_Humidade_Solo_Screen.c
+    ui_Ar_Screen.c
+    ui_Home_Screen.c
     ui.c
     ui_comp_hook.c
     ui_helpers.c)
