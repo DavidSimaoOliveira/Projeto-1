@@ -30,6 +30,7 @@ extern "C" {
 #include "ui_Humidade_Solo_Screen.h"
 #include "ui_Ar_Screen.h"
 #include "ui_Home_Screen.h"
+#include "ui_Def_Screen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -37,6 +38,10 @@ extern "C" {
 // EVENTS
 
 extern lv_obj_t * ui____initial_actions0;
+
+// IMAGES AND IMAGE SETS
+LV_IMG_DECLARE(
+    ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png);    // assets/Gemini_Generated_Image_fo8hn8fo8hn8fo8h_129x160.png
 
 // UI INIT
 void ui_init(void);

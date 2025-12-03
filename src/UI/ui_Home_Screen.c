@@ -14,6 +14,8 @@ void ui_Home_Screen_screen_init(void)
 {
     ui_Home_Screen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Home_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_img_src(ui_Home_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
+                                LV_PART_MAIN | LV_STATE_DEFAULT);
 
 }
 

@@ -7,14 +7,21 @@
 
 #define BUTTON_1 19
 #define BUTTON_2 20
+#define BUTTON_3 21
 
 #define Sensor_Solo 1
 
 #define MIN_VALUE_HUMIDADE_SOLO
+int DESIRED_VALUE_HUMIDADE_SOLO = 0; // a medir
 #define MAX_VALUE_HUMIDADE_SOLO
 
 #define MIN_VALUE_HUMIDADE_AR
+int DESIRED_VALUE_HUMIDADE_AR = 0; // a medir
 #define MAX_VALUE_HUMIDADE_AR
+
+#define MIN_VALUE_TEMP_AR
+int DESIRED_VALUE_TEMP_AR = 0; // a medir
+#define MIN_VALUE_TEMP_AR
 
 #define MIN_VALUE_QUANTIDADE_AGUA
 #define MAX_VALUE_QUANTIDADE_AGUA
@@ -61,11 +68,31 @@ float tempAr;
 int humidadeAr;
 int quantidadeAgua;
 
+int lastSoloCheck = millis();
+#define SoloCheckIntervalo 16
+int lastTempCheck = millis();
+#define TempCheckIntervalo 16
+int lastAirCheck = millis();
+#define AirCheckIntervalo 16
+/*
+
 void checkValues()
 {
-    humidadeAr = measureHumidadeAr();
-    humidadeSolo = measureHumidadeSolo();
-    tempAr = measureTempAr();
+    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
+    {
+        humidadeAr = measureHumidadeAr();
+        lastSoloCheck = millis();
+    }
+    if (millis() - lastAirCheck >= TempCheckIntervalo)
+    {
+        humidadeSolo = measureHumidadeSolo();
+        lastAirCheck = millis();
+    }
+    if (millis() - lastTempCheck >= AirCheckIntervalo)
+    {
+        tempAr = measureTempAr();
+        lastTempCheck = millis();
+    }
 }
 
 int measureHumidadeSolo()
@@ -83,7 +110,6 @@ float measureTempAr()
 
     return value;
 }
-
 int measureHumidadeAr()
 {
     int value;
@@ -101,23 +127,69 @@ int measureQuantidadeAgua()
 
     return resultado;
 }
+*/
+typedef enum
+{
+    Home,
+    Solo,
+    Ar,
+    Def,
+} Ecra;
+
+Ecra ecra = Home;
 
 void update_Screen()
 {
-    if (digitalRead(BUTTON_1) == LOW)
+    switch (ecra)
+    {
+    case (Home):
+    {
+        _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+        if (BUTTON_1 == LOW)
+        {
+            ecra = Solo;
+        }
+        else if (BUTTON_2 == LOW)
+        {
+            ecra = Ar;
+        }
+        else if (BUTTON_3 == LOW)
+        {
+            ecra = Def;
+        }
+    }
+    break;
+    case (Solo):
     {
         _ui_screen_change(&ui_Humidade_Solo_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+        if (BUTTON_1 == LOW)
+        {
+            ecra = Home;
+        }
     }
-    if (digitalRead(BUTTON_2) == LOW)
+    break;
+    case (Ar):
     {
         _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+        if (BUTTON_2 == LOW)
+        {
+            ecra = Home;
+        }
     }
-}
+    break;
+    case (Def):
+    {
+        _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
+    }
+    break;
+    }
+};
+
 void update_ScreenValues()
 {
-    lv_label_set_text_fmt(ui_HumidadeSolo, "%g %", humidadeSolo);
-    lv_label_set_text_fmt(ui_HumidadeAr, "%g %", humidadeAr);
-    lv_label_set_text_fmt(ui_TempAr, "%g %", tempAr);
+    lv_label_set_text_fmt(ui_HumidadeSolo, "Humidade do Solo:%g%", humidadeSolo);
+    lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", humidadeAr);
+    lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", tempAr);
 }
 
 void setup()
@@ -153,27 +225,19 @@ void setup()
 
     pinMode(BUTTON_1, INPUT_PULLUP);
     pinMode(BUTTON_2, INPUT_PULLUP);
+    pinMode(BUTTON_3, INPUT_PULLUP);
 
     pinMode(Sensor_Solo, INPUT);
-
-    Serial.println("Sup, estou a funcionar");
-    lv_scr_load(ui_Home_Screen);
 }
-
-int lastSoloCheck = millis();
-#define SoloCheckIntervalo
-int lastTempCheck = millis();
-#define TempCheckIntervalo
-int lastAirCheck = millis();
-#define AirCheckIntervalo
 
 void loop()
 {
     ticks();
     lv_timer_handler();
 
-    update_ScreenValues();
-    update_Screen();
+    /*checkValues();
 
-    delay(1000 / 60);
+    update_ScreenValues();
+    */
+    update_Screen();
 }
