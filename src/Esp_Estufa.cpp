@@ -26,13 +26,13 @@ int CURRENT_HUMIDADE_SOLO;
 
 #define MIN_VALUE_HUMIDADE_AR 0
 int DESIRED_VALUE_HUMIDADE_AR = 0; // a medir
-int CURRENT_HUMIDADE_AR;
+float CURRENT_HUMIDADE_AR;
 #define MAX_VALUE_HUMIDADE_AR 100
 
 #define MIN_VALUE_TEMP_AR 0
 int DESIRED_VALUE_TEMP_AR = 0; // a medir
 float CURRENT_TEMP_AR;
-#define MIN_VALUE_TEMP_AR 40
+#define MAX_VALUE_TEMP_AR 40
 
 #define MIN_VALUE_QUANTIDADE_AGUA
 int CURRENT_NIVEL_AGUA;
@@ -104,7 +104,7 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
 //=========================================================================================================
 
 int lastSoloCheck = millis();
-#define SoloCheckIntervalo 16
+#define SoloCheckIntervalo 2000
 int lastTempCheck = millis();
 #define TempCheckIntervalo 2000
 int lastAirCheck = millis();
@@ -112,7 +112,7 @@ int lastAirCheck = millis();
 
 /*int measureHumidadeSolo()
 {
-    int value;
+    int value=analogRead(SensorSolo);
 
     int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
 
@@ -121,13 +121,13 @@ int lastAirCheck = millis();
 */
 float measureTempAr()
 {
-    int resultado = (CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
 
     return resultado;
 }
 int measureHumidadeAr()
 {
-    int resultado = (CURRENT_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(CURRENT_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
 
     return resultado;
 }
@@ -142,25 +142,6 @@ int measureHumidadeAr()
 }
 */
 
-void checkValues()
-{
-    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
-        lastSoloCheck = millis();
-    }
-    if (millis() - lastAirCheck >= AirCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_AR = sensor.readTemperature(false, false);
-        lastAirCheck = millis();
-    }
-    if (millis() - lastTempCheck >= TempCheckIntervalo)
-    {
-        CURRENT_TEMP_AR = sensor.readHumidity(false);
-        lastTempCheck = millis();
-    }
-}
-
 void update_ScreenValues()
 {
     // lv_label_set_text_fmt(ui_Humidade_Solo, "Humidade do Solo:%g%", CURRENT_HUMIDADE_SOLO);
@@ -168,13 +149,55 @@ void update_ScreenValues()
     float humidadeAr = measureHumidadeAr();
     float tempAr = measureTempAr();
 
-    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%g%", humidadeAr);
+    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%f%", CURRENT_HUMIDADE_AR);
     lv_arc_set_value(ui_Arc_Humidade_Ar, humidadeAr);
 
-    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %gºC", measureTempAr());
-    lv_bar_set_value(ui_Bar_Temp, measureTempAr(), LV_ANIM_OFF);
+    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %fºC", CURRENT_TEMP_AR);
+    lv_bar_set_value(ui_Bar_Temp, tempAr, LV_ANIM_OFF);
     // lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
     // lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", CURRENT_TEMPERATURA_AR);
+}
+void checkValues()
+{
+    bool dataChanged = false; // Flag to check if we need to update screen
+
+    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
+    {
+        CURRENT_HUMIDADE_SOLO = measureHumidadeAr(); // Note: Logic seems odd here (measuring Air for Solo?), check your logic
+        lastSoloCheck = millis();
+        dataChanged = true;
+    }
+
+    if (millis() - lastAirCheck >= AirCheckIntervalo)
+    {
+        float newHumi = sensor.readHumidity(false);
+        // Basic error check for DHT
+        if (!isnan(newHumi))
+        {
+            CURRENT_HUMIDADE_AR = newHumi;
+            Serial.println(CURRENT_HUMIDADE_AR);
+            dataChanged = true;
+        }
+        lastAirCheck = millis();
+    }
+
+    if (millis() - lastTempCheck >= TempCheckIntervalo)
+    {
+        float newTemp = sensor.readTemperature(false, false);
+        if (!isnan(newTemp))
+        {
+            CURRENT_TEMP_AR = newTemp;
+            Serial.println(CURRENT_TEMP_AR);
+            dataChanged = true;
+        }
+        lastTempCheck = millis();
+    }
+
+    // ONLY update the screen if data actually changed
+    if (dataChanged)
+    {
+        update_ScreenValues();
+    }
 }
 
 typedef enum
@@ -185,54 +208,77 @@ typedef enum
     Def,
 } Ecra;
 
-Ecra ecra = Home;
+Ecra currentEcra = Home;
+Ecra targetEcra = Home;
+
+unsigned long lastButtonPress = 0;
+#define DEBOUNCE_DELAY 500
+#define ANIMATION_DURATION 600
 
 void update_Screen()
 {
-    switch (ecra)
+    if (millis() - lastButtonPress > DEBOUNCE_DELAY)
     {
-    case (Home):
-    {
-        _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
         if (digitalRead(BUTTON_1) == LOW)
         {
-            ecra = Solo;
+            lastButtonPress = millis();
+            if (currentEcra == Home)
+                targetEcra = Solo;
+            else if (currentEcra == Ar)
+                targetEcra = Home;
         }
         else if (digitalRead(BUTTON_2) == LOW)
         {
-            ecra = Ar;
+            lastButtonPress = millis();
+            if (currentEcra == Home)
+                targetEcra = Ar;
+            else if (currentEcra == Solo)
+                targetEcra = Home;
         }
         else if (digitalRead(BUTTON_3) == LOW)
         {
-            ecra = Def;
+            lastButtonPress = millis();
+            if (currentEcra == Home)
+                targetEcra = Def;
+            else if (currentEcra == Def)
+                targetEcra = Home;
         }
     }
-    break;
-    case (Solo):
+
+    if (targetEcra != currentEcra)
     {
-        _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        if (digitalRead(BUTTON_1) == LOW)
+        switch (targetEcra)
         {
-            ecra = Home;
+        case Home:
+            if (currentEcra == Def)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, ANIMATION_DURATION, 0, NULL);
+            }
+            else if (currentEcra == Solo)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, ANIMATION_DURATION, 0, NULL);
+            }
+            else if (currentEcra == Ar)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, ANIMATION_DURATION, 0, NULL);
+            }
+            break;
+
+        case Solo:
+            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, ANIMATION_DURATION, 0, NULL);
+            break;
+
+        case Ar:
+            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, ANIMATION_DURATION, 0, NULL);
+            break;
+
+        case Def:
+            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, ANIMATION_DURATION, 0, NULL);
+            break;
         }
+        currentEcra = targetEcra;
     }
-    break;
-    case (Ar):
-    {
-        _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        if (digitalRead(BUTTON_2) == LOW)
-        {
-            ecra = Home;
-        }
-    }
-    break;
-    case (Def):
-    {
-        _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-    }
-    break;
-    }
-};
+}
 
 void setup()
 {
@@ -262,7 +308,7 @@ void setup()
     lv_init();
 
     // buffer de desenho LVGL
-    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 320 * 20);
+    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 320 * 40);
 
     // driver LVGL
     static lv_disp_drv_t disp_drv;
@@ -301,4 +347,6 @@ void loop()
     update_ScreenValues();
 
     update_Screen();
+
+    delay(2);
 }
