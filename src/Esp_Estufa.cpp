@@ -110,25 +110,6 @@ int lastTempCheck = millis();
 int lastAirCheck = millis();
 #define AirCheckIntervalo 2000
 
-void checkValues()
-{
-    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
-        lastSoloCheck = millis();
-    }
-    if (millis() - lastAirCheck >= AirCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_AR = sensor.readTemperature(false, false);
-        lastAirCheck = millis();
-    }
-    if (millis() - lastTempCheck >= TempCheckIntervalo)
-    {
-        CURRENT_TEMP_AR = sensor.readHumidity(false);
-        lastTempCheck = millis();
-    }
-}
-
 /*int measureHumidadeSolo()
 {
     int value;
@@ -161,6 +142,24 @@ int measureHumidadeAr()
 }
 */
 
+void checkValues()
+{
+    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
+    {
+        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
+        lastSoloCheck = millis();
+    }
+    if (millis() - lastAirCheck >= AirCheckIntervalo)
+    {
+        CURRENT_HUMIDADE_AR = sensor.readTemperature(false, false);
+        lastAirCheck = millis();
+    }
+    if (millis() - lastTempCheck >= TempCheckIntervalo)
+    {
+        CURRENT_TEMP_AR = sensor.readHumidity(false);
+        lastTempCheck = millis();
+    }
+}
 
 void update_ScreenValues()
 {
