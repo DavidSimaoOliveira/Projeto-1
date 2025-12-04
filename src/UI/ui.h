@@ -27,10 +27,10 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
-#include "ui_Humidade_Solo_Screen.h"
-#include "ui_Ar_Screen.h"
 #include "ui_Home_Screen.h"
 #include "ui_Def_Screen.h"
+#include "ui_Solo_Screen.h"
+#include "ui_Ar_Screen.h"
 
 ///////////////////// VARIABLES ////////////////////
 

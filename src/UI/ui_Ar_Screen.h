@@ -14,8 +14,10 @@ extern "C" {
 extern void ui_Ar_Screen_screen_init(void);
 extern void ui_Ar_Screen_screen_destroy(void);
 extern lv_obj_t * ui_Ar_Screen;
-extern lv_obj_t * ui_HumidadeAr;
-extern lv_obj_t * ui_TempAr;
+extern lv_obj_t * ui_Humidade_Ar;
+extern lv_obj_t * ui_Arc_Humidade_Ar;
+extern lv_obj_t * ui_Bar_Temp;
+extern lv_obj_t * ui_Temp_Ar;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

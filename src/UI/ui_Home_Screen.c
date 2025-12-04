@@ -6,6 +6,8 @@
 #include "ui.h"
 
 lv_obj_t * ui_Home_Screen = NULL;
+lv_obj_t * ui_Label3 = NULL;
+lv_obj_t * ui_Label4 = NULL;
 // event funtions
 
 // build funtions
@@ -17,6 +19,20 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Home_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Label3 = lv_label_create(ui_Home_Screen);
+    lv_obj_set_width(ui_Label3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label3, 1);
+    lv_obj_set_y(ui_Label3, -57);
+    lv_obj_set_align(ui_Label3, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label3, "Nigga");
+
+    ui_Label4 = lv_label_create(ui_Home_Screen);
+    lv_obj_set_width(ui_Label4, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label4, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label4, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label4, "otario");
+
 }
 
 void ui_Home_Screen_screen_destroy(void)
@@ -25,5 +41,7 @@ void ui_Home_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Home_Screen = NULL;
+    ui_Label3 = NULL;
+    ui_Label4 = NULL;
 
 }

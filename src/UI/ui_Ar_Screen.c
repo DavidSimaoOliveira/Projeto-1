@@ -6,8 +6,10 @@
 #include "ui.h"
 
 lv_obj_t * ui_Ar_Screen = NULL;
-lv_obj_t * ui_HumidadeAr = NULL;
-lv_obj_t * ui_TempAr = NULL;
+lv_obj_t * ui_Humidade_Ar = NULL;
+lv_obj_t * ui_Arc_Humidade_Ar = NULL;
+lv_obj_t * ui_Bar_Temp = NULL;
+lv_obj_t * ui_Temp_Ar = NULL;
 // event funtions
 
 // build funtions
@@ -16,18 +18,49 @@ void ui_Ar_Screen_screen_init(void)
 {
     ui_Ar_Screen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Ar_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_img_src(ui_Ar_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
+                                LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_img_opa(ui_Ar_Screen, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_HumidadeAr = lv_label_create(ui_Ar_Screen);
-    lv_obj_set_width(ui_HumidadeAr, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_HumidadeAr, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_HumidadeAr, 2);
-    lv_obj_set_y(ui_HumidadeAr, -35);
-    lv_obj_set_align(ui_HumidadeAr, LV_ALIGN_CENTER);
+    ui_Humidade_Ar = lv_label_create(ui_Ar_Screen);
+    lv_obj_set_width(ui_Humidade_Ar, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Humidade_Ar, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Humidade_Ar, 0);
+    lv_obj_set_y(ui_Humidade_Ar, -37);
+    lv_obj_set_align(ui_Humidade_Ar, LV_ALIGN_CENTER);
 
-    ui_TempAr = lv_label_create(ui_Ar_Screen);
-    lv_obj_set_width(ui_TempAr, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_TempAr, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_TempAr, LV_ALIGN_CENTER);
+    ui_Arc_Humidade_Ar = lv_arc_create(ui_Ar_Screen);
+    lv_obj_set_width(ui_Arc_Humidade_Ar, 86);
+    lv_obj_set_height(ui_Arc_Humidade_Ar, 80);
+    lv_obj_set_x(ui_Arc_Humidade_Ar, 4);
+    lv_obj_set_y(ui_Arc_Humidade_Ar, 5);
+    lv_obj_set_align(ui_Arc_Humidade_Ar, LV_ALIGN_TOP_MID);
+    lv_arc_set_value(ui_Arc_Humidade_Ar, 50);
+    lv_obj_set_style_bg_img_opa(ui_Arc_Humidade_Ar, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_color(ui_Arc_Humidade_Ar, lv_color_hex(0x5CE0F6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_opa(ui_Arc_Humidade_Ar, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_arc_color(ui_Arc_Humidade_Ar, lv_color_hex(0x6565ED), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_opa(ui_Arc_Humidade_Ar, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_Arc_Humidade_Ar, lv_color_hex(0x133AE6), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Arc_Humidade_Ar, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+    ui_Bar_Temp = lv_bar_create(ui_Ar_Screen);
+    lv_bar_set_value(ui_Bar_Temp, 25, LV_ANIM_OFF);
+    lv_bar_set_start_value(ui_Bar_Temp, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_Bar_Temp, 117);
+    lv_obj_set_height(ui_Bar_Temp, 10);
+    lv_obj_set_x(ui_Bar_Temp, -1);
+    lv_obj_set_y(ui_Bar_Temp, 27);
+    lv_obj_set_align(ui_Bar_Temp, LV_ALIGN_CENTER);
+
+    ui_Temp_Ar = lv_label_create(ui_Ar_Screen);
+    lv_obj_set_width(ui_Temp_Ar, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Temp_Ar, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Temp_Ar, 0);
+    lv_obj_set_y(ui_Temp_Ar, 45);
+    lv_obj_set_align(ui_Temp_Ar, LV_ALIGN_CENTER);
 
 }
 
@@ -37,7 +70,9 @@ void ui_Ar_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Ar_Screen = NULL;
-    ui_HumidadeAr = NULL;
-    ui_TempAr = NULL;
+    ui_Humidade_Ar = NULL;
+    ui_Arc_Humidade_Ar = NULL;
+    ui_Bar_Temp = NULL;
+    ui_Temp_Ar = NULL;
 
 }

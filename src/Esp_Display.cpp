@@ -1,13 +1,21 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
+#include <DHT.h>
+#include <WiFi.h>
+#include <esp_now.h>
 #include "LGFX_config.h"
 
 #include "UI/ui.h"
 
+#define DHTPIN 14
+#define DHTTYPE DHT11
+
+DHT sensor(DHTPIN, DHTTYPE);
+
 #define BUTTON_1 19
-#define BUTTON_2 20
-#define BUTTON_3 21
+#define BUTTON_2 9
+#define BUTTON_3 15
 
 #define Sensor_Solo 1
 
@@ -63,6 +71,32 @@ void ticks()
     lastMillis = currentMillis;
 }
 
+//==============================================================================================================
+// eps now
+uint8_t broadcastAddress[] = {0xFC, 0x01, 0x2C, 0xF9, 0x2, 0x5C};
+
+typedef struct
+{
+    float DESIRED_TEMP;
+    int DESIRED_HUMI_AR;
+    int DESIRED_HUMI_SOLO;
+} Message;
+
+Message myData;
+esp_now_peer_info_t peerInfo;
+
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+    Serial.print("\r\nStatus do envio: ");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Sucesso" : "Falha");
+}
+
+void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
+{
+    memcpy(&myData, incomingData, sizeof(myData));
+}
+
+//=========================================================================================================
 int humidadeSolo;
 float tempAr;
 int humidadeAr;
@@ -138,63 +172,100 @@ typedef enum
 
 Ecra ecra = Home;
 
+long lastChange = millis();
+Ecra lastEcra = Home;
+
 void update_Screen()
 {
-    switch (ecra)
+    if (millis() - lastChange > 500)
     {
-    case (Home):
-    {
-        _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        if (BUTTON_1 == LOW)
+        if (digitalRead(BUTTON_1) == LOW)
         {
-            ecra = Solo;
+            lastChange = millis();
+            if (ecra == Home)
+                ecra = Solo;
+            else if (ecra == Ar)
+                ecra = Home;
         }
-        else if (BUTTON_2 == LOW)
+        else if (digitalRead(BUTTON_2) == LOW)
         {
-            ecra = Ar;
+            lastChange = millis();
+            if (ecra == Home)
+                ecra = Ar;
+            else if (ecra == Solo)
+                ecra = Home;
         }
-        else if (BUTTON_3 == LOW)
+        else if (digitalRead(BUTTON_3) == LOW)
         {
-            ecra = Def;
-        }
-    }
-    break;
-    case (Solo):
-    {
-        _ui_screen_change(&ui_Humidade_Solo_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        if (BUTTON_1 == LOW)
-        {
-            ecra = Home;
-        }
-    }
-    break;
-    case (Ar):
-    {
-        _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-        if (BUTTON_2 == LOW)
-        {
-            ecra = Home;
+            lastChange = millis();
+            if (ecra == Home)
+                ecra = Def;
+            else if (ecra == Def)
+                ecra = Home;
         }
     }
-    break;
-    case (Def):
+
+    if (lastEcra != ecra)
     {
-        _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 20, 20, NULL);
-    }
-    break;
+        switch (ecra)
+        {
+        case Home:
+            if (lastEcra == Def)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 200, 0, NULL);
+            }
+            else if (lastEcra == Solo)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, NULL);
+            }
+            else if (lastEcra == Ar)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, NULL);
+            }
+            break;
+        case Solo:
+            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, NULL);
+            break;
+
+        case Ar:
+            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, NULL);
+            break;
+
+        case Def:
+            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, 200, 0, NULL);
+            break;
+        }
+        lastEcra = ecra;
     }
 };
 
 void update_ScreenValues()
 {
     lv_label_set_text_fmt(ui_HumidadeSolo, "Humidade do Solo:%g%", humidadeSolo);
-    lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", humidadeAr);
-    lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", tempAr);
+    // lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%g%", humidadeAr);
+    // lv_label_set_text_fmt(ui_Temp_Ar, "Temperatura:%gº", tempAr);
+    lv_arc_set_value(ui_ArcHumidadeSolo, humidadeSolo);
 }
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
+    sensor.begin();
+    WiFi.mode(WIFI_STA);
+
+    esp_now_init();
+
+    memset(&peerInfo, 0, sizeof(peerInfo));
+
+    // Configura o Peer
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false; // Sem encriptação para teste inicial
+
+    esp_now_add_peer(&peerInfo);
+
+    esp_now_register_send_cb(OnDataSent);
+    esp_now_register_recv_cb(OnDataRecv);
 
     // Inicializa o display
     display.init();
@@ -204,7 +275,7 @@ void setup()
     lv_init();
 
     // buffer de desenho LVGL
-    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 320 * 20);
+    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 320 * 40);
 
     // driver LVGL
     static lv_disp_drv_t disp_drv;
@@ -228,16 +299,35 @@ void setup()
     pinMode(BUTTON_3, INPUT_PULLUP);
 
     pinMode(Sensor_Solo, INPUT);
+
+    _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_FADE_IN, 200, 0, NULL);
+
+    // checkValues();
+    // update_ScreenValues();
 }
+
+long lastPrint;
 
 void loop()
 {
     ticks();
     lv_timer_handler();
 
-    /*checkValues();
+    if (millis() - lastPrint > 2000)
+    {
+        float temp = sensor.readTemperature(false, false);
+        float humidade = sensor.readHumidity(false);
 
-    update_ScreenValues();
-    */
-    update_Screen();
+        Serial.println(temp);
+        Serial.println(humidade);
+        Serial.println("========================================================================================");
+        lastPrint = millis();
+    }
+
+    // checkValues();
+
+    // update_ScreenValues();
+
+    // update_Screen();
+    delay(5);
 }
