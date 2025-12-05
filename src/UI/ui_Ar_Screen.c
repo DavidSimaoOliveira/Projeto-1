@@ -20,7 +20,6 @@ void ui_Ar_Screen_screen_init(void)
     lv_obj_clear_flag(ui_Ar_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_img_src(ui_Ar_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_img_opa(ui_Ar_Screen, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Humidade_Ar = lv_label_create(ui_Ar_Screen);
     lv_obj_set_width(ui_Humidade_Ar, LV_SIZE_CONTENT);   /// 1
@@ -28,6 +27,7 @@ void ui_Ar_Screen_screen_init(void)
     lv_obj_set_x(ui_Humidade_Ar, 0);
     lv_obj_set_y(ui_Humidade_Ar, -37);
     lv_obj_set_align(ui_Humidade_Ar, LV_ALIGN_CENTER);
+    lv_obj_set_style_text_align(ui_Humidade_Ar, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Arc_Humidade_Ar = lv_arc_create(ui_Ar_Screen);
     lv_obj_set_width(ui_Arc_Humidade_Ar, 86);

@@ -2,6 +2,7 @@ SET(SOURCES ui_Home_Screen.c
     ui_Def_Screen.c
     ui_Solo_Screen.c
     ui_Ar_Screen.c
+    ui_Solo_Screen1.c
     ui.c
     ui_comp_hook.c
     ui_helpers.c

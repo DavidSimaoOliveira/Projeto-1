@@ -18,7 +18,6 @@ void ui_Solo_Screen_screen_init(void)
     lv_obj_clear_flag(ui_Solo_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_img_src(ui_Solo_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_img_opa(ui_Solo_Screen, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Humidade_Solo = lv_label_create(ui_Solo_Screen);
     lv_obj_set_width(ui_Humidade_Solo, LV_SIZE_CONTENT);   /// 1

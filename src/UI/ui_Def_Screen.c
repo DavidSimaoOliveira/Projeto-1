@@ -6,7 +6,7 @@
 #include "ui.h"
 
 lv_obj_t * ui_Def_Screen = NULL;
-lv_obj_t * ui_Roller2 = NULL;
+lv_obj_t * ui_Options = NULL;
 // event funtions
 
 // build funtions
@@ -18,13 +18,15 @@ void ui_Def_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Def_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Roller2 = lv_roller_create(ui_Def_Screen);
-    lv_roller_set_options(ui_Roller2, "Option 1\nOption 2\nOption 3", LV_ROLLER_MODE_NORMAL);
-    lv_obj_set_height(ui_Roller2, 159);
-    lv_obj_set_width(ui_Roller2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align(ui_Roller2, LV_ALIGN_CENTER);
+    ui_Options = lv_roller_create(ui_Def_Screen);
+    lv_roller_set_options(ui_Options, "Brilho\nSistema", LV_ROLLER_MODE_NORMAL);
+    lv_obj_set_height(ui_Options, 93);
+    lv_obj_set_width(ui_Options, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_x(ui_Options, 0);
+    lv_obj_set_y(ui_Options, 25);
+    lv_obj_set_align(ui_Options, LV_ALIGN_CENTER);
 
-    lv_obj_set_style_blend_mode(ui_Roller2, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_blend_mode(ui_Options, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
 }
 
@@ -34,6 +36,6 @@ void ui_Def_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Def_Screen = NULL;
-    ui_Roller2 = NULL;
+    ui_Options = NULL;
 
 }

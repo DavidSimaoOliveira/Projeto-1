@@ -260,10 +260,9 @@ void setup()
 
     memset(&peerInfo, 0, sizeof(peerInfo));
 
-    // Configura o Peer
     memcpy(peerInfo.peer_addr, broadcastAddress, 6);
     peerInfo.channel = 0;
-    peerInfo.encrypt = false; // Sem encriptação para teste inicial
+    peerInfo.encrypt = false;
 
     esp_now_add_peer(&peerInfo);
 
@@ -301,10 +300,6 @@ void setup()
     pinMode(BUTTON_2, INPUT_PULLUP);
     pinMode(BUTTON_3, INPUT_PULLUP);
 
-    pinMode(BOMBA, OUTPUT);
-
-    pinMode(Sensor_Solo, INPUT);
-
     // checkValues();
     // update_ScreenValues();
 }
@@ -314,6 +309,6 @@ void loop()
     ticks();
     lv_timer_handler();
 
-    checkValues();
+
     update_Screen();
 }

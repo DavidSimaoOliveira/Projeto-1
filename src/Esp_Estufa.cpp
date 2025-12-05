@@ -20,17 +20,18 @@ DHT sensor(DHTPIN, DHTTYPE);
 #define Sensor_Solo 1
 
 #define MIN_VALUE_HUMIDADE_SOLO
-int DESIRED_VALUE_HUMIDADE_SOLO = 0; // a medir
+int DESIRED_VALUE_HUMIDADE_SOLO = 0;
 int CURRENT_HUMIDADE_SOLO;
+int MAPPED_HUMIDADE_SOLO_VALUE;
 #define MAX_VALUE_HUMIDADE_SOLO
 
 #define MIN_VALUE_HUMIDADE_AR 0
-int DESIRED_VALUE_HUMIDADE_AR = 0; // a medir
+int DESIRED_VALUE_HUMIDADE_AR = 0;
 float CURRENT_HUMIDADE_AR;
 #define MAX_VALUE_HUMIDADE_AR 100
 
 #define MIN_VALUE_TEMP_AR 0
-int DESIRED_VALUE_TEMP_AR = 0; // a medir
+int DESIRED_VALUE_TEMP_AR = 0;
 float CURRENT_TEMP_AR;
 #define MAX_VALUE_TEMP_AR 40
 
@@ -103,13 +104,6 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
 
 //=========================================================================================================
 
-int lastSoloCheck = millis();
-#define SoloCheckIntervalo 2000
-int lastTempCheck = millis();
-#define TempCheckIntervalo 2000
-int lastAirCheck = millis();
-#define AirCheckIntervalo 2000
-
 /*int measureHumidadeSolo()
 {
     int value=analogRead(SensorSolo);
@@ -121,7 +115,7 @@ int lastAirCheck = millis();
 */
 float measureTempAr()
 {
-    int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_TEMP_AR, 0, 100);
 
     return resultado;
 }
@@ -147,23 +141,38 @@ void update_ScreenValues()
     // lv_label_set_text_fmt(ui_Humidade_Solo, "Humidade do Solo:%g%", CURRENT_HUMIDADE_SOLO);
 
     float humidadeAr = measureHumidadeAr();
-    float tempAr = measureTempAr();
+    char MensHumi[40] = {};
+    String MensHumidade = "Humidade do Ar:\n" + String(CURRENT_HUMIDADE_AR) + "%";
+    MensHumidade.toCharArray(MensHumi, 40);
 
-    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%f%", CURRENT_HUMIDADE_AR);
+    float tempAr = measureTempAr();
+    char MensTemp[40] = {};
+    String MensTemperatura = "Temp: " + String(CURRENT_TEMP_AR) + "ºC";
+    MensTemperatura.toCharArray(MensTemp, 40);
+
+    lv_label_set_text_fmt(ui_Humidade_Ar, MensHumi);
     lv_arc_set_value(ui_Arc_Humidade_Ar, humidadeAr);
 
-    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %fºC", CURRENT_TEMP_AR);
+    lv_label_set_text_fmt(ui_Temp_Ar, MensTemp);
     lv_bar_set_value(ui_Bar_Temp, tempAr, LV_ANIM_OFF);
     // lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
     // lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", CURRENT_TEMPERATURA_AR);
 }
+
+int lastSoloCheck = millis();
+#define SoloCheckIntervalo 2000
+int lastTempCheck = millis();
+#define TempCheckIntervalo 2000
+int lastAirCheck = millis();
+#define AirCheckIntervalo 2000
+
 void checkValues()
 {
-    bool dataChanged = false; // Flag to check if we need to update screen
+    bool dataChanged = false;
 
     if (millis() - lastSoloCheck >= SoloCheckIntervalo)
     {
-        CURRENT_HUMIDADE_SOLO = measureHumidadeAr(); // Note: Logic seems odd here (measuring Air for Solo?), check your logic
+        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
         lastSoloCheck = millis();
         dataChanged = true;
     }
@@ -193,7 +202,6 @@ void checkValues()
         lastTempCheck = millis();
     }
 
-    // ONLY update the screen if data actually changed
     if (dataChanged)
     {
         update_ScreenValues();
@@ -212,8 +220,8 @@ Ecra currentEcra = Home;
 Ecra targetEcra = Home;
 
 unsigned long lastButtonPress = 0;
-#define DEBOUNCE_DELAY 500
-#define ANIMATION_DURATION 600
+#define DEBOUNCE_DELAY 600     // os dois valores têm que ser iguais(ou o debounce maior)
+#define ANIMATION_DURATION 600 // senão a animação começa antes da animação anterior acabar
 
 void update_Screen()
 {

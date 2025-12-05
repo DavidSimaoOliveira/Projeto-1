@@ -37,6 +37,7 @@ void ui_init(void)
     ui_Def_Screen_screen_init();
     ui_Solo_Screen_screen_init();
     ui_Ar_Screen_screen_init();
+    ui_Solo_Screen1_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Home_Screen);
 }
@@ -47,4 +48,5 @@ void ui_destroy(void)
     ui_Def_Screen_screen_destroy();
     ui_Solo_Screen_screen_destroy();
     ui_Ar_Screen_screen_destroy();
+    ui_Solo_Screen1_screen_destroy();
 }
