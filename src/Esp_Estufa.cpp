@@ -1,23 +1,17 @@
 #include <Arduino.h>
-#include <lvgl.h>
-#include <LovyanGFX.hpp>
 #include <DHT.h>
 #include <WiFi.h>
 #include <esp_now.h>
-#include "LGFX_config.h"
-
-#include "UI/ui.h"
 
 #define DHTPIN 14
 #define DHTTYPE DHT11
 
 DHT sensor(DHTPIN, DHTTYPE);
 
-#define BUTTON_1 19
-#define BUTTON_2 9
-#define BUTTON_3 15
-
 #define Sensor_Solo 1
+
+#define trigPin 13
+#define echoPin 12
 
 #define MIN_VALUE_HUMIDADE_SOLO
 int DESIRED_VALUE_HUMIDADE_SOLO = 0;
@@ -39,80 +33,52 @@ float CURRENT_TEMP_AR;
 int CURRENT_NIVEL_AGUA;
 #define MAX_VALUE_QUANTIDADE_AGUA
 
-LGFX display;
-
-// buffer LVGL
-static lv_color_t buf1[320 * 40];
-static lv_color_t buf2[320 * 40];
-static lv_disp_draw_buf_t draw_buf;
-
-// função LVGL → LovyanGFX (desenha no display)
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
-{
-    uint32_t w = (area->x2 - area->x1 + 1);
-    uint32_t h = (area->y2 - area->y1 + 1);
-
-    display.startWrite();
-    display.setAddrWindow(area->x1, area->y1, w, h);
-    display.pushColors((uint16_t *)&color_p->full, w * h, true);
-    display.endWrite();
-
-    lv_disp_flush_ready(disp);
-}
-
-/*void indev_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
-{
-}
-*/
-
-unsigned long currentMillis;
-unsigned long lastMillis = 0;
-
-void ticks()
-{
-    currentMillis = millis();
-
-    lv_tick_inc(currentMillis - lastMillis);
-    lastMillis = currentMillis;
-}
-
 //==============================================================================================================
 // eps now
-uint8_t broadcastAddress[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
+
+uint8_t display[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
 
 typedef struct
 {
-    float CURRENT_TEMP;
+    float DESIRED_TEMP;
     int CURRENT_HUMI_AR;
     int CURRENT_HUMI_SOLO;
     int CURRENT_NIVEL_AGUA;
-} Message;
+} Message_Received;
 
-Message myData;
+typedef struct
+{
+    float CURRENT_TEMP_AR;
+    int CURRENT_HUMI_AR;
+    int CURRENT_HUMI_SOLO;
+    int CURRENT_NIVEL_AGUA;
+} Message_Sent;
+
+Message_Received Data_Received;
+Message_Sent Data_Send;
 esp_now_peer_info_t peerInfo;
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    Serial.print("\r\nStatus do envio: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Sucesso" : "Falha");
 }
 
 void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
 {
-    memcpy(&myData, incomingData, sizeof(myData));
+    memcpy(&Data_Received, incomingData, sizeof(Data_Received));
 }
 
 //=========================================================================================================
-
-/*int measureHumidadeSolo()
+/*
+int measureHumidadeSolo()
 {
-    int value=analogRead(SensorSolo);
+    int value=analogRead(Sensor_Solo);
 
     int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
 
     return resultado;
 }
 */
+
 float measureTempAr()
 {
     int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_TEMP_AR, 0, 100);
@@ -126,37 +92,25 @@ int measureHumidadeAr()
     return resultado;
 }
 
-/*int measureQuantidadeAgua()
+int measureWater()
 {
-    int value;
+    long duration, distance;
+    int quantidade = 0;
 
-    int resultado = (value, MIN_VALUE_QUANTIDADE_AGUA, MAX_VALUE_QUANTIDADE_AGUA, 0, 100);
+    // Send pulse
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    // Wait for echo and measure time until it happens
+    duration = pulseIn(echoPin, HIGH);
+    // Compute distance
+    distance = duration / 58;
 
-    return resultado;
-}
-*/
+    quantidade = map(distance, 0, 300, 0, 100);
 
-void update_ScreenValues()
-{
-    // lv_label_set_text_fmt(ui_Humidade_Solo, "Humidade do Solo:%g%", CURRENT_HUMIDADE_SOLO);
-
-    float humidadeAr = measureHumidadeAr();
-    char MensHumi[40] = {};
-    String MensHumidade = "Humidade do Ar:\n" + String(CURRENT_HUMIDADE_AR) + "%";
-    MensHumidade.toCharArray(MensHumi, 40);
-
-    float tempAr = measureTempAr();
-    char MensTemp[40] = {};
-    String MensTemperatura = "Temp: " + String(CURRENT_TEMP_AR) + "ºC";
-    MensTemperatura.toCharArray(MensTemp, 40);
-
-    lv_label_set_text_fmt(ui_Humidade_Ar, MensHumi);
-    lv_arc_set_value(ui_Arc_Humidade_Ar, humidadeAr);
-
-    lv_label_set_text_fmt(ui_Temp_Ar, MensTemp);
-    lv_bar_set_value(ui_Bar_Temp, tempAr, LV_ANIM_OFF);
-    // lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
-    // lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", CURRENT_TEMPERATURA_AR);
+    return quantidade;
 }
 
 int lastSoloCheck = millis();
@@ -165,6 +119,8 @@ int lastTempCheck = millis();
 #define TempCheckIntervalo 2000
 int lastAirCheck = millis();
 #define AirCheckIntervalo 2000
+int lastWaterLevelCheck = millis();
+#define WaterLevelCheckIntervalo 2000
 
 void checkValues()
 {
@@ -172,20 +128,28 @@ void checkValues()
 
     if (millis() - lastSoloCheck >= SoloCheckIntervalo)
     {
-        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
-        lastSoloCheck = millis();
-        dataChanged = true;
+        int novaHumidade = measureHumidadeAr();
+        if (CURRENT_HUMIDADE_SOLO != novaHumidade)
+        {
+            CURRENT_HUMIDADE_SOLO = novaHumidade;
+            Data_Send.CURRENT_HUMI_SOLO = CURRENT_HUMIDADE_SOLO;
+            lastSoloCheck = millis();
+            dataChanged = true;
+        }
     }
 
     if (millis() - lastAirCheck >= AirCheckIntervalo)
     {
         float newHumi = sensor.readHumidity(false);
-        // Basic error check for DHT
+
         if (!isnan(newHumi))
         {
-            CURRENT_HUMIDADE_AR = newHumi;
-            Serial.println(CURRENT_HUMIDADE_AR);
-            dataChanged = true;
+            if (CURRENT_HUMIDADE_AR != newHumi)
+            {
+                Data_Send.CURRENT_HUMI_AR = CURRENT_HUMIDADE_AR;
+                CURRENT_HUMIDADE_AR = newHumi;
+                dataChanged = true;
+            }
         }
         lastAirCheck = millis();
     }
@@ -195,96 +159,31 @@ void checkValues()
         float newTemp = sensor.readTemperature(false, false);
         if (!isnan(newTemp))
         {
-            CURRENT_TEMP_AR = newTemp;
-            Serial.println(CURRENT_TEMP_AR);
-            dataChanged = true;
+            if (CURRENT_TEMP_AR != newTemp)
+            {
+                Data_Send.CURRENT_TEMP_AR = CURRENT_TEMP_AR;
+                CURRENT_TEMP_AR = newTemp;
+                dataChanged = true;
+            }
         }
         lastTempCheck = millis();
     }
 
+    if (millis() - lastWaterLevelCheck >= WaterLevelCheckIntervalo)
+    {
+        int newWaterLevel = measureWater();
+        if (CURRENT_NIVEL_AGUA != newWaterLevel)
+        {
+            Data_Send.CURRENT_NIVEL_AGUA = CURRENT_NIVEL_AGUA;
+            CURRENT_NIVEL_AGUA = newWaterLevel;
+            dataChanged = true;
+        }
+        lastWaterLevelCheck = millis();
+    }
+
     if (dataChanged)
     {
-        update_ScreenValues();
-    }
-}
-
-typedef enum
-{
-    Home,
-    Solo,
-    Ar,
-    Def,
-} Ecra;
-
-Ecra currentEcra = Home;
-Ecra targetEcra = Home;
-
-unsigned long lastButtonPress = 0;
-#define DEBOUNCE_DELAY 600     // os dois valores têm que ser iguais(ou o debounce maior)
-#define ANIMATION_DURATION 600 // senão a animação começa antes da animação anterior acabar
-
-void update_Screen()
-{
-    if (millis() - lastButtonPress > DEBOUNCE_DELAY)
-    {
-        if (digitalRead(BUTTON_1) == LOW)
-        {
-            lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Solo;
-            else if (currentEcra == Ar)
-                targetEcra = Home;
-        }
-        else if (digitalRead(BUTTON_2) == LOW)
-        {
-            lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Ar;
-            else if (currentEcra == Solo)
-                targetEcra = Home;
-        }
-        else if (digitalRead(BUTTON_3) == LOW)
-        {
-            lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Def;
-            else if (currentEcra == Def)
-                targetEcra = Home;
-        }
-    }
-
-    if (targetEcra != currentEcra)
-    {
-        switch (targetEcra)
-        {
-        case Home:
-            if (currentEcra == Def)
-            {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, ANIMATION_DURATION, 0, NULL);
-            }
-            else if (currentEcra == Solo)
-            {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, ANIMATION_DURATION, 0, NULL);
-            }
-            else if (currentEcra == Ar)
-            {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, ANIMATION_DURATION, 0, NULL);
-            }
-            break;
-
-        case Solo:
-            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, ANIMATION_DURATION, 0, NULL);
-            break;
-
-        case Ar:
-            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, ANIMATION_DURATION, 0, NULL);
-            break;
-
-        case Def:
-            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, ANIMATION_DURATION, 0, NULL);
-            break;
-        }
-        currentEcra = targetEcra;
+        esp_now_send(display, (uint8_t *)&Data_Send, sizeof(Data_Send));
     }
 }
 
@@ -299,7 +198,7 @@ void setup()
     memset(&peerInfo, 0, sizeof(peerInfo));
 
     // Configura o Peer
-    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    memcpy(peerInfo.peer_addr, display, 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false; // Sem encriptação para teste inicial
 
@@ -308,53 +207,18 @@ void setup()
     esp_now_register_send_cb(OnDataSent);
     esp_now_register_recv_cb(OnDataRecv);
 
-    // Inicializa o display
-    display.init();
-    display.setBrightness(255);
-
-    // Inicializa LVGL
-    lv_init();
-
-    // buffer de desenho LVGL
-    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 320 * 40);
-
-    // driver LVGL
-    static lv_disp_drv_t disp_drv;
-    lv_indev_drv_t indev_drv;
-
-    lv_disp_drv_init(&disp_drv);
-
-    disp_drv.hor_res = display.width();
-    disp_drv.ver_res = display.height();
-
-    disp_drv.flush_cb = my_disp_flush;
-    disp_drv.draw_buf = &draw_buf;
-    indev_drv.type = LV_INDEV_TYPE_KEYPAD;
-    // indev_drv.read_cb = indev_read;
-    lv_disp_drv_register(&disp_drv);
-
-    ui_init();
-
-    pinMode(BUTTON_1, INPUT_PULLUP);
-    pinMode(BUTTON_2, INPUT_PULLUP);
-    pinMode(BUTTON_3, INPUT_PULLUP);
-
     pinMode(Sensor_Solo, INPUT);
 
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+
     // checkValues();
-    // update_ScreenValues();
 }
 
 void loop()
 {
-    ticks();
-    lv_timer_handler();
 
     checkValues();
-
-    update_ScreenValues();
-
-    update_Screen();
 
     delay(2);
 }

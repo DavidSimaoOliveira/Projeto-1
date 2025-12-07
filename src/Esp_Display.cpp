@@ -34,7 +34,7 @@ int CURRENT_HUMIDADE_AR;
 #define MIN_VALUE_TEMP_AR 0
 int DESIRED_VALUE_TEMP_AR = 0; // a medir
 float CURRENT_TEMP_AR;
-#define MIN_VALUE_TEMP_AR 40
+#define MAX_VALUE_TEMP_AR 40
 
 #define MIN_VALUE_QUANTIDADE_AGUA
 int CURRENT_NIVEL_AGUA;
@@ -77,44 +77,10 @@ void ticks()
     lastMillis = currentMillis;
 }
 
-//==============================================================================================================
-// eps now
-uint8_t broadcastAddress[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
-
-typedef struct
+/*
+int measureHumidadeSolo()
 {
-    float CURRENT_TEMP;
-    int CURRENT_HUMI_AR;
-    int CURRENT_HUMI_SOLO;
-    int CURRENT_NIVEL_AGUA;
-} Message;
-
-Message myData;
-esp_now_peer_info_t peerInfo;
-
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
-{
-    Serial.print("\r\nStatus do envio: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Sucesso" : "Falha");
-}
-
-void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
-{
-    memcpy(&myData, incomingData, sizeof(myData));
-}
-
-//=========================================================================================================
-
-int lastSoloCheck = millis();
-#define SoloCheckIntervalo 16
-int lastTempCheck = millis();
-#define TempCheckIntervalo 2000
-int lastAirCheck = millis();
-#define AirCheckIntervalo 2000
-
-/*int measureHumidadeSolo()
-{
-    int value;
+    int value=analogRead(Sensor_Solo);
 
     int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
 
@@ -123,58 +89,31 @@ int lastAirCheck = millis();
 */
 float measureTempAr()
 {
-    int resultado = (CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_TEMP_AR, 0, 100);
 
     return resultado;
 }
+
 int measureHumidadeAr()
 {
-    int resultado = (CURRENT_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(CURRENT_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
 
     return resultado;
-}
-
-/*int measureQuantidadeAgua()
-{
-    int value;
-
-    int resultado = (value, MIN_VALUE_QUANTIDADE_AGUA, MAX_VALUE_QUANTIDADE_AGUA, 0, 100);
-
-    return resultado;
-}
-*/
-
-void checkValues()
-{
-    if (millis() - lastSoloCheck >= SoloCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_SOLO = measureHumidadeAr();
-        lastSoloCheck = millis();
-    }
-    if (millis() - lastAirCheck >= AirCheckIntervalo)
-    {
-        CURRENT_HUMIDADE_AR = sensor.readTemperature(false, false);
-        lastAirCheck = millis();
-    }
-    if (millis() - lastTempCheck >= TempCheckIntervalo)
-    {
-        CURRENT_TEMP_AR = sensor.readHumidity(false);
-        lastTempCheck = millis();
-    }
 }
 
 void update_ScreenValues()
 {
-    // lv_label_set_text_fmt(ui_Humidade_Solo, "Humidade do Solo:%g%", CURRENT_HUMIDADE_SOLO);
+    char mens_Humidade_solo[30] = {};
+    String mensagem = "Humidade do Solo:\n" + String(CURRENT_HUMIDADE_SOLO) + "%";
+    mensagem.toCharArray(mens_Humidade_solo, sizeof(mens_Humidade_solo));
 
-    float humidadeAr = measureHumidadeAr();
-    float tempAr = measureTempAr();
+    lv_label_set_text_fmt(ui_Humidade_Solo, mens_Humidade_solo);
+    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
+    lv_arc_set_value(ui_Arc_Humidade_Ar, CURRENT_HUMIDADE_AR);
 
-    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%g%", humidadeAr);
-    lv_arc_set_value(ui_Arc_Humidade_Ar, humidadeAr);
-
-    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %gºC", tempAr);
-    lv_bar_set_value(ui_Bar_Temp, tempAr, LV_ANIM_OFF);
+    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %gºC", CURRENT_TEMP_AR);
+    int tempBar = map(CURRENT_TEMP_AR, 0, 40, 0, 100);
+    lv_bar_set_value(ui_Bar_Temp, tempBar, LV_ANIM_OFF);
     // lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
     // lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", CURRENT_TEMPERATURA_AR);
 }
@@ -191,7 +130,7 @@ Ecra currentEcra = Home;
 Ecra targetEcra = Home;
 
 unsigned long lastButtonPress = 0;
-#define DEBOUNCE_DELAY 200
+#define DEBOUNCE_DELAY 600
 
 void update_Screen()
 {
@@ -230,24 +169,74 @@ void update_Screen()
         case Home:
             if (currentEcra == Def)
             {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, NULL);
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 600, 0, NULL);
+            }
+            else if (currentEcra == Solo)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 600, 0, NULL);
+            }
+            else if (currentEcra == Ar)
+            {
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 600, 0, NULL);
             }
             break;
 
         case Solo:
-            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, NULL);
+            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 600, 0, NULL);
             break;
 
         case Ar:
-            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, NULL);
+            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 600, 0, NULL);
             break;
 
         case Def:
-            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, NULL);
+            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, 600, 0, NULL);
             break;
         }
         currentEcra = targetEcra;
     }
+}
+
+//==============================================================================================================
+// eps now
+
+uint8_t estufa[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
+
+typedef struct
+{
+    float DESIRED_TEMP;
+    int CURRENT_HUMI_AR;
+    int CURRENT_HUMI_SOLO;
+    int CURRENT_NIVEL_AGUA;
+} Message_Sent;
+
+typedef struct
+{
+    float CURRENT_TEMP_AR;
+    int CURRENT_HUMI_AR;
+    int CURRENT_HUMI_SOLO;
+    int CURRENT_NIVEL_AGUA;
+} Message_Received;
+
+Message_Received Data_received;
+esp_now_peer_info_t peerInfo;
+
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+    Serial.print("\r\nStatus do envio: ");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Sucesso" : "Falha");
+}
+
+void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
+{
+    memcpy(&Data_received, incomingData, sizeof(Data_received));
+
+    CURRENT_HUMIDADE_AR = Data_received.CURRENT_HUMI_AR;
+    CURRENT_HUMIDADE_SOLO = Data_received.CURRENT_HUMI_SOLO;
+    CURRENT_TEMP_AR = Data_received.CURRENT_TEMP_AR;
+    CURRENT_NIVEL_AGUA = Data_received.CURRENT_NIVEL_AGUA;
+
+    update_ScreenValues();
 }
 
 void setup()
@@ -260,7 +249,7 @@ void setup()
 
     memset(&peerInfo, 0, sizeof(peerInfo));
 
-    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    memcpy(peerInfo.peer_addr, estufa, 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
 
@@ -299,16 +288,12 @@ void setup()
     pinMode(BUTTON_1, INPUT_PULLUP);
     pinMode(BUTTON_2, INPUT_PULLUP);
     pinMode(BUTTON_3, INPUT_PULLUP);
-
-    // checkValues();
-    // update_ScreenValues();
 }
 
 void loop()
 {
     ticks();
     lv_timer_handler();
-
 
     update_Screen();
 }
