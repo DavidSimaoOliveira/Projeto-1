@@ -1,44 +1,51 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
-#include <DHT.h>
 #include <WiFi.h>
 #include <esp_now.h>
 #include "LGFX_config.h"
 
 #include "UI/ui.h"
 
-#define DHTPIN 14
-#define DHTTYPE DHT11
-
-DHT sensor(DHTPIN, DHTTYPE);
-
 #define BUTTON_1 19
 #define BUTTON_2 9
 #define BUTTON_3 15
 
-#define BOMBA 7
+#define PINO_LITE 12
 
-#define Sensor_Solo 1
-
-#define MIN_VALUE_HUMIDADE_SOLO
+#define MIN_VALUE_HUMIDADE_SOLO 300
 int DESIRED_VALUE_HUMIDADE_SOLO = 0; // a medir
-int CURRENT_HUMIDADE_SOLO;
-#define MAX_VALUE_HUMIDADE_SOLO
+#define MAX_VALUE_HUMIDADE_SOLO 700
 
 #define MIN_VALUE_HUMIDADE_AR 0
 int DESIRED_VALUE_HUMIDADE_AR = 0; // a medir
-int CURRENT_HUMIDADE_AR;
 #define MAX_VALUE_HUMIDADE_AR 100
 
 #define MIN_VALUE_TEMP_AR 0
-int DESIRED_VALUE_TEMP_AR = 0; // a medir
-float CURRENT_TEMP_AR;
 #define MAX_VALUE_TEMP_AR 40
 
 #define MIN_VALUE_QUANTIDADE_AGUA
-int CURRENT_NIVEL_AGUA;
 #define MAX_VALUE_QUANTIDADE_AGUA
+
+#define LUMINUSIDADE 100
+
+int TARGET_HUMIDADE_SOLO = 0;
+int TARGET_HUMIDADE_AR = 0;
+float TARGET_TEMP_AR = 0;
+int TARGET_NIVEL_AGUA = 0;
+
+float DISP_HUMIDADE_SOLO = 0;
+float DISP_HUMIDADE_AR = 0;
+float DISP_TEMP_AR = 0;
+float DISP_NIVEL_AGUA = 0;
+
+float START_HUMIDADE_SOLO = 0;
+float START_HUMIDADE_AR = 0;
+float START_TEMP_AR = 0;
+float START_NIVEL_AGUA = 0;
+
+unsigned long lastDataTime = 0;
+const unsigned long UPDATE_INTERVAL = 2000;
 
 LGFX display;
 
@@ -77,45 +84,59 @@ void ticks()
     lastMillis = currentMillis;
 }
 
-/*
-int measureHumidadeSolo()
-{
-    int value=analogRead(Sensor_Solo);
-
-    int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
-
-    return resultado;
-}
-*/
 float measureTempAr()
 {
-    int resultado = map(CURRENT_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_TEMP_AR, 0, 100);
+    int resultado = map(DISP_TEMP_AR, MIN_VALUE_TEMP_AR, MAX_VALUE_TEMP_AR, 0, 100);
 
     return resultado;
 }
 
 int measureHumidadeAr()
 {
-    int resultado = map(CURRENT_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
+    int resultado = map(DISP_HUMIDADE_AR, MIN_VALUE_HUMIDADE_AR, MAX_VALUE_HUMIDADE_AR, 0, 100);
 
     return resultado;
 }
 
 void update_ScreenValues()
 {
-    char mens_Humidade_solo[30] = {};
-    String mensagem = "Humidade do Solo:\n" + String(CURRENT_HUMIDADE_SOLO) + "%";
-    mensagem.toCharArray(mens_Humidade_solo, sizeof(mens_Humidade_solo));
+    unsigned long timePassed = millis() - lastDataTime;
 
-    lv_label_set_text_fmt(ui_Humidade_Solo, mens_Humidade_solo);
-    lv_label_set_text_fmt(ui_Humidade_Ar, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
-    lv_arc_set_value(ui_Arc_Humidade_Ar, CURRENT_HUMIDADE_AR);
+    // Calcula o progresso de 0.0 a 1.0
+    float progress = (float)timePassed / (float)UPDATE_INTERVAL;
 
-    lv_label_set_text_fmt(ui_Temp_Ar, "Temperatur: %gºC", CURRENT_TEMP_AR);
-    int tempBar = map(CURRENT_TEMP_AR, 0, 40, 0, 100);
-    lv_bar_set_value(ui_Bar_Temp, tempBar, LV_ANIM_OFF);
-    // lv_label_set_text_fmt(ui_HumidadeAr, "Humidade do Ar:%g%", CURRENT_HUMIDADE_AR);
-    // lv_label_set_text_fmt(ui_TempAr, "Temperatura:%gº", CURRENT_TEMPERATURA_AR);
+    // Impede que o progresso ultrapasse 1.0 (se a estufa atrasar)
+    if (progress > 1.0)
+        progress = 1.0;
+
+    char mensagem_A[30] = {};
+
+    DISP_HUMIDADE_SOLO = START_HUMIDADE_SOLO + ((TARGET_HUMIDADE_SOLO - START_HUMIDADE_SOLO) * progress);
+
+    String msg = String(DISP_HUMIDADE_SOLO, 1) + "%";
+    msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+    lv_label_set_text(ui_Humidade_Solo, mensagem_A);
+    lv_arc_set_value(ui_Arc_Humidade_Solo, (int)DISP_HUMIDADE_SOLO);
+
+    DISP_HUMIDADE_AR = START_HUMIDADE_AR + ((TARGET_HUMIDADE_AR - START_HUMIDADE_AR) * progress);
+
+    msg = String(DISP_HUMIDADE_AR, 1) + "%";
+    msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+    lv_label_set_text(ui_Humidade_Ar, mensagem_A);
+    lv_arc_set_value(ui_Arc_Humidade_Ar, (int)DISP_HUMIDADE_AR);
+
+    DISP_TEMP_AR = START_TEMP_AR + ((TARGET_TEMP_AR - START_TEMP_AR) * progress);
+
+    msg = "Temp: " + String(DISP_TEMP_AR, 1) + "C";
+    msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+    lv_label_set_text(ui_Temp_Ar, mensagem_A);
+    lv_bar_set_value(ui_Bar_Temp, measureTempAr(), LV_ANIM_OFF);
+
+    DISP_NIVEL_AGUA = START_NIVEL_AGUA + ((TARGET_NIVEL_AGUA - START_NIVEL_AGUA) * progress);
+
+    msg = String(DISP_NIVEL_AGUA, 0) + "%";
+    msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+    lv_label_set_text(ui_Nivel_Agua, mensagem_A);
 }
 
 typedef enum
@@ -130,35 +151,86 @@ Ecra currentEcra = Home;
 Ecra targetEcra = Home;
 
 unsigned long lastButtonPress = 0;
-#define DEBOUNCE_DELAY 600
+#define DEBOUNCE_DELAY 400
 
 void update_Screen()
 {
+    int brilho = map(LUMINUSIDADE, 0, 100, 0, 255);
+    analogWrite(PINO_LITE, brilho);
+
+    uint16_t totalOpts = lv_roller_get_option_cnt(ui_Options);
+
     if (millis() - lastButtonPress > DEBOUNCE_DELAY)
     {
         if (digitalRead(BUTTON_1) == LOW)
         {
             lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Solo;
-            else if (currentEcra == Ar)
-                targetEcra = Home;
+
+            if (currentEcra == Def)
+            {
+                uint16_t currentOpt = lv_roller_get_selected(ui_Options);
+
+                if (currentOpt > 0)
+                {
+                    lv_roller_set_selected(ui_Options, currentOpt - 1, LV_ANIM_ON);
+                }
+                else if (currentOpt == 0)
+                {
+                    lv_roller_set_selected(ui_Options, totalOpts - 1, LV_ANIM_ON);
+                }
+            }
+            else
+            {
+                if (currentEcra == Home)
+                    targetEcra = Solo;
+                else if (currentEcra == Ar)
+                    targetEcra = Home;
+            }
         }
         else if (digitalRead(BUTTON_2) == LOW)
         {
             lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Ar;
-            else if (currentEcra == Solo)
-                targetEcra = Home;
+
+            if (currentEcra == Def)
+            {
+                uint16_t currentOpt = lv_roller_get_selected(ui_Options);
+
+                if (currentOpt < totalOpts - 1)
+                {
+                    lv_roller_set_selected(ui_Options, currentOpt + 1, LV_ANIM_ON);
+                }
+                else if (currentOpt == totalOpts - 1)
+                {
+                    lv_roller_set_selected(ui_Options, 0, LV_ANIM_ON);
+                }
+            }
+            else
+            {
+                if (currentEcra == Home)
+                    targetEcra = Ar;
+                else if (currentEcra == Solo)
+                    targetEcra = Home;
+            }
         }
         else if (digitalRead(BUTTON_3) == LOW)
         {
             lastButtonPress = millis();
-            if (currentEcra == Home)
-                targetEcra = Def;
-            else if (currentEcra == Def)
+
+            if (currentEcra == Def)
+            {
+
+                int opcao = lv_roller_get_selected(ui_Options);
+                /*switch (opcao)
+                {
+                case (0):
+                }
+                */
                 targetEcra = Home;
+            }
+            else if (currentEcra == Home)
+            {
+                targetEcra = Def;
+            }
         }
     }
 
@@ -169,28 +241,28 @@ void update_Screen()
         case Home:
             if (currentEcra == Def)
             {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 600, 0, NULL);
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 400, 0, NULL);
             }
             else if (currentEcra == Solo)
             {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 600, 0, NULL);
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 400, 0, NULL);
             }
             else if (currentEcra == Ar)
             {
-                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 600, 0, NULL);
+                _ui_screen_change(&ui_Home_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 400, 0, NULL);
             }
             break;
 
         case Solo:
-            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 600, 0, NULL);
+            _ui_screen_change(&ui_Solo_Screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 400, 0, NULL);
             break;
 
         case Ar:
-            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 600, 0, NULL);
+            _ui_screen_change(&ui_Ar_Screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 400, 0, NULL);
             break;
 
         case Def:
-            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, 600, 0, NULL);
+            _ui_screen_change(&ui_Def_Screen, LV_SCR_LOAD_ANIM_MOVE_TOP, 400, 0, NULL);
             break;
         }
         currentEcra = targetEcra;
@@ -205,9 +277,7 @@ uint8_t estufa[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
 typedef struct
 {
     float DESIRED_TEMP;
-    int CURRENT_HUMI_AR;
-    int CURRENT_HUMI_SOLO;
-    int CURRENT_NIVEL_AGUA;
+    int DESIRED_HUMI_SOLO;
 } Message_Sent;
 
 typedef struct
@@ -231,18 +301,22 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
 {
     memcpy(&Data_received, incomingData, sizeof(Data_received));
 
-    CURRENT_HUMIDADE_AR = Data_received.CURRENT_HUMI_AR;
-    CURRENT_HUMIDADE_SOLO = Data_received.CURRENT_HUMI_SOLO;
-    CURRENT_TEMP_AR = Data_received.CURRENT_TEMP_AR;
-    CURRENT_NIVEL_AGUA = Data_received.CURRENT_NIVEL_AGUA;
+    START_HUMIDADE_AR = DISP_HUMIDADE_AR;
+    START_HUMIDADE_SOLO = DISP_HUMIDADE_SOLO;
+    START_TEMP_AR = DISP_TEMP_AR;
+    START_NIVEL_AGUA = DISP_NIVEL_AGUA;
 
-    update_ScreenValues();
+    TARGET_HUMIDADE_AR = Data_received.CURRENT_HUMI_AR;
+    TARGET_HUMIDADE_SOLO = Data_received.CURRENT_HUMI_SOLO;
+    TARGET_TEMP_AR = Data_received.CURRENT_TEMP_AR;
+    TARGET_NIVEL_AGUA = Data_received.CURRENT_NIVEL_AGUA;
+
+    lastDataTime = millis();
 }
 
 void setup()
 {
     Serial.begin(9600);
-    sensor.begin();
     WiFi.mode(WIFI_STA);
 
     esp_now_init();
@@ -285,10 +359,28 @@ void setup()
 
     ui_init();
 
+    // 1. Fundo principal do Roller transparente
+    lv_obj_set_style_bg_opa(ui_Options, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(ui_Options, 0, LV_PART_MAIN); // Remove a borda
+
+    // 2. Cor do texto (Ajusta para Branco ou Preto dependendo do teu fundo)
+    lv_obj_set_style_text_color(ui_Options, lv_color_white(), LV_PART_MAIN);
+
+    // 3. Estilo da faixa central selecionada
+    // Define uma cor que combine com o teu tema (ex: um azul claro, ou branco)
+    // E usa uma opacidade baixa (ex: 50% = LV_OPA_50) para ver o fundo através dela
+    lv_obj_set_style_bg_color(ui_Options, lv_palette_main(LV_PALETTE_BLUE), LV_PART_SELECTED);
+    lv_obj_set_style_bg_opa(ui_Options, LV_OPA_50, LV_PART_SELECTED);            // Semi-transparente
+    lv_obj_set_style_text_color(ui_Options, lv_color_white(), LV_PART_SELECTED); // Texto selecionado
+
     pinMode(BUTTON_1, INPUT_PULLUP);
     pinMode(BUTTON_2, INPUT_PULLUP);
     pinMode(BUTTON_3, INPUT_PULLUP);
+
+    pinMode(PINO_LITE, OUTPUT);
 }
+
+unsigned long lastAnimUpdate = 0;
 
 void loop()
 {
@@ -296,4 +388,10 @@ void loop()
     lv_timer_handler();
 
     update_Screen();
+
+    if (millis() - lastAnimUpdate > 20)
+    {
+        update_ScreenValues();
+        lastAnimUpdate = millis();
+    }
 }

@@ -18,6 +18,9 @@ extern lv_obj_t * ui_Humidade_Ar;
 extern lv_obj_t * ui_Arc_Humidade_Ar;
 extern lv_obj_t * ui_Bar_Temp;
 extern lv_obj_t * ui_Temp_Ar;
+extern lv_obj_t * ui_Label2;
+extern lv_obj_t * ui_Label5;
+extern lv_obj_t * ui_Label7;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

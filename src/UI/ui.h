@@ -31,7 +31,10 @@ extern "C" {
 #include "ui_Def_Screen.h"
 #include "ui_Solo_Screen.h"
 #include "ui_Ar_Screen.h"
-#include "ui_Solo_Screen1.h"
+#include "ui_Solo_Def_Screen.h"
+#include "ui_Temp_Def_Screen.h"
+#include "ui_Luminosidade_Def.h"
+#include "ui_Sistema_Screen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -43,6 +46,7 @@ extern lv_obj_t * ui____initial_actions0;
 // IMAGES AND IMAGE SETS
 LV_IMG_DECLARE(
     ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png);    // assets/Gemini_Generated_Image_fo8hn8fo8hn8fo8h_129x160.png
+LV_IMG_DECLARE(ui_img_drop_png);    // assets/drop.png
 
 // UI INIT
 void ui_init(void);

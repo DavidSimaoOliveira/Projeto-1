@@ -6,8 +6,9 @@
 #include "ui.h"
 
 lv_obj_t * ui_Home_Screen = NULL;
-lv_obj_t * ui_Label3 = NULL;
-lv_obj_t * ui_Label4 = NULL;
+lv_obj_t * ui_Image1 = NULL;
+lv_obj_t * ui_Label11 = NULL;
+lv_obj_t * ui_Nivel_Agua = NULL;
 // event funtions
 
 // build funtions
@@ -19,19 +20,40 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Home_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label3 = lv_label_create(ui_Home_Screen);
-    lv_obj_set_width(ui_Label3, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label3, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label3, 1);
-    lv_obj_set_y(ui_Label3, -57);
-    lv_obj_set_align(ui_Label3, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label3, "Nigga");
+    ui_Image1 = lv_img_create(ui_Home_Screen);
+    lv_img_set_src(ui_Image1, &ui_img_drop_png);
+    lv_obj_set_width(ui_Image1, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Image1, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Image1, 52);
+    lv_obj_set_y(ui_Image1, -68);
+    lv_obj_set_align(ui_Image1, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Label4 = lv_label_create(ui_Home_Screen);
-    lv_obj_set_width(ui_Label4, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label4, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label4, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label4, "otario");
+    ui_Label11 = lv_label_create(ui_Home_Screen);
+    lv_obj_set_width(ui_Label11, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label11, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label11, -1);
+    lv_obj_set_y(ui_Label11, -24);
+    lv_obj_set_align(ui_Label11, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label11, "EISA");
+    lv_obj_set_style_text_color(ui_Label11, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label11, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label11, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Nivel_Agua = lv_label_create(ui_Home_Screen);
+    lv_obj_set_width(ui_Nivel_Agua, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Nivel_Agua, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Nivel_Agua, 30);
+    lv_obj_set_y(ui_Nivel_Agua, -68);
+    lv_obj_set_align(ui_Nivel_Agua, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Nivel_Agua, "100%");
+    lv_obj_set_style_text_color(ui_Nivel_Agua, lv_color_hex(0x232323), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Nivel_Agua, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Nivel_Agua, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Nivel_Agua, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_Nivel_Agua, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_blend_mode(ui_Nivel_Agua, LV_BLEND_MODE_NORMAL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 }
 
@@ -41,7 +63,8 @@ void ui_Home_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Home_Screen = NULL;
-    ui_Label3 = NULL;
-    ui_Label4 = NULL;
+    ui_Image1 = NULL;
+    ui_Label11 = NULL;
+    ui_Nivel_Agua = NULL;
 
 }

@@ -15,7 +15,8 @@ extern void ui_Solo_Screen_screen_init(void);
 extern void ui_Solo_Screen_screen_destroy(void);
 extern lv_obj_t * ui_Solo_Screen;
 extern lv_obj_t * ui_Humidade_Solo;
-extern lv_obj_t * ui_ArcHumidadeSolo;
+extern lv_obj_t * ui_Arc_Humidade_Solo;
+extern lv_obj_t * ui_Label6;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

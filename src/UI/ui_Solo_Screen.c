@@ -7,7 +7,8 @@
 
 lv_obj_t * ui_Solo_Screen = NULL;
 lv_obj_t * ui_Humidade_Solo = NULL;
-lv_obj_t * ui_ArcHumidadeSolo = NULL;
+lv_obj_t * ui_Arc_Humidade_Solo = NULL;
+lv_obj_t * ui_Label6 = NULL;
 // event funtions
 
 // build funtions
@@ -24,23 +25,37 @@ void ui_Solo_Screen_screen_init(void)
     lv_obj_set_height(ui_Humidade_Solo, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Humidade_Solo, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Humidade_Solo, "NIgga");
+    lv_obj_set_style_text_color(ui_Humidade_Solo, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Humidade_Solo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_ArcHumidadeSolo = lv_arc_create(ui_Solo_Screen);
-    lv_obj_set_width(ui_ArcHumidadeSolo, 112);
-    lv_obj_set_height(ui_ArcHumidadeSolo, 118);
-    lv_obj_set_x(ui_ArcHumidadeSolo, 0);
-    lv_obj_set_y(ui_ArcHumidadeSolo, 13);
-    lv_obj_set_align(ui_ArcHumidadeSolo, LV_ALIGN_CENTER);
-    lv_arc_set_value(ui_ArcHumidadeSolo, 50);
-    lv_obj_set_style_opa(ui_ArcHumidadeSolo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_arc_color(ui_ArcHumidadeSolo, lv_color_hex(0x5CE0F6), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_arc_opa(ui_ArcHumidadeSolo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Arc_Humidade_Solo = lv_arc_create(ui_Solo_Screen);
+    lv_obj_set_width(ui_Arc_Humidade_Solo, 112);
+    lv_obj_set_height(ui_Arc_Humidade_Solo, 118);
+    lv_obj_set_x(ui_Arc_Humidade_Solo, 0);
+    lv_obj_set_y(ui_Arc_Humidade_Solo, 13);
+    lv_obj_set_align(ui_Arc_Humidade_Solo, LV_ALIGN_CENTER);
+    lv_arc_set_value(ui_Arc_Humidade_Solo, 50);
+    lv_obj_set_style_opa(ui_Arc_Humidade_Solo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_color(ui_Arc_Humidade_Solo, lv_color_hex(0x5CE0F6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_opa(ui_Arc_Humidade_Solo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_arc_color(ui_ArcHumidadeSolo, lv_color_hex(0x6565ED), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_arc_opa(ui_ArcHumidadeSolo, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_color(ui_Arc_Humidade_Solo, lv_color_hex(0x6565ED), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_opa(ui_Arc_Humidade_Solo, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_bg_color(ui_ArcHumidadeSolo, lv_color_hex(0x133AE6), LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_ArcHumidadeSolo, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Arc_Humidade_Solo, lv_color_hex(0x133AE6), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Arc_Humidade_Solo, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+    ui_Label6 = lv_label_create(ui_Solo_Screen);
+    lv_obj_set_width(ui_Label6, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label6, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label6, 2);
+    lv_obj_set_y(ui_Label6, -64);
+    lv_obj_set_align(ui_Label6, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label6, "Humidade Solo");
+    lv_obj_set_style_text_color(ui_Label6, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label6, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Label6, lv_color_hex(0x0D0606), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Label6, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 }
 
@@ -51,6 +66,7 @@ void ui_Solo_Screen_screen_destroy(void)
     // NULL screen variables
     ui_Solo_Screen = NULL;
     ui_Humidade_Solo = NULL;
-    ui_ArcHumidadeSolo = NULL;
+    ui_Arc_Humidade_Solo = NULL;
+    ui_Label6 = NULL;
 
 }

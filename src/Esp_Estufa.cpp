@@ -8,16 +8,15 @@
 
 DHT sensor(DHTPIN, DHTTYPE);
 
-#define Sensor_Solo 1
+#define Sensor_Solo 2
 
 #define trigPin 13
 #define echoPin 12
 
-#define MIN_VALUE_HUMIDADE_SOLO
+#define MIN_VALUE_HUMIDADE_SOLO 300
 int DESIRED_VALUE_HUMIDADE_SOLO = 0;
 int CURRENT_HUMIDADE_SOLO;
-int MAPPED_HUMIDADE_SOLO_VALUE;
-#define MAX_VALUE_HUMIDADE_SOLO
+#define MAX_VALUE_HUMIDADE_SOLO 700
 
 #define MIN_VALUE_HUMIDADE_AR 0
 int DESIRED_VALUE_HUMIDADE_AR = 0;
@@ -41,9 +40,7 @@ uint8_t display[] = {0xFC, 0x01, 0x2C, 0xF9, 0x03, 0x5C};
 typedef struct
 {
     float DESIRED_TEMP;
-    int CURRENT_HUMI_AR;
-    int CURRENT_HUMI_SOLO;
-    int CURRENT_NIVEL_AGUA;
+    int DESIRED_HUMI_SOLO;
 } Message_Received;
 
 typedef struct
@@ -65,19 +62,28 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
 {
     memcpy(&Data_Received, incomingData, sizeof(Data_Received));
-}
 
+    DESIRED_VALUE_HUMIDADE_SOLO = Data_Received.DESIRED_HUMI_SOLO;
+    DESIRED_VALUE_TEMP_AR = Data_Received.DESIRED_TEMP;
+}
 //=========================================================================================================
-/*
 int measureHumidadeSolo()
 {
-    int value=analogRead(Sensor_Solo);
+    int value = analogRead(Sensor_Solo);
 
-    int resultado = (value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
+    int resultado = map(value, MIN_VALUE_HUMIDADE_SOLO, MAX_VALUE_HUMIDADE_SOLO, 0, 100);
+
+    if (resultado > 100)
+    {
+        resultado = 100;
+    }
+    else if (resultado < 0)
+    {
+        resultado = 0;
+    }
 
     return resultado;
 }
-*/
 
 float measureTempAr()
 {
@@ -109,8 +115,16 @@ int measureWater()
     distance = duration / 58;
 
     quantidade = map(distance, 0, 300, 0, 100);
+    if (quantidade >= 100)
+    {
+        quantidade = 100;
+    }
+    else if (quantidade < 0)
+    {
+        quantidade = 0;
+    }
 
-    return quantidade;
+    return 100 - quantidade;
 }
 
 int lastSoloCheck = millis();
@@ -128,7 +142,7 @@ void checkValues()
 
     if (millis() - lastSoloCheck >= SoloCheckIntervalo)
     {
-        int novaHumidade = measureHumidadeAr();
+        int novaHumidade = measureHumidadeSolo();
         if (CURRENT_HUMIDADE_SOLO != novaHumidade)
         {
             CURRENT_HUMIDADE_SOLO = novaHumidade;
@@ -146,8 +160,8 @@ void checkValues()
         {
             if (CURRENT_HUMIDADE_AR != newHumi)
             {
-                Data_Send.CURRENT_HUMI_AR = CURRENT_HUMIDADE_AR;
                 CURRENT_HUMIDADE_AR = newHumi;
+                Data_Send.CURRENT_HUMI_AR = CURRENT_HUMIDADE_AR;
                 dataChanged = true;
             }
         }
@@ -161,8 +175,8 @@ void checkValues()
         {
             if (CURRENT_TEMP_AR != newTemp)
             {
-                Data_Send.CURRENT_TEMP_AR = CURRENT_TEMP_AR;
                 CURRENT_TEMP_AR = newTemp;
+                Data_Send.CURRENT_TEMP_AR = CURRENT_TEMP_AR;
                 dataChanged = true;
             }
         }
@@ -174,8 +188,8 @@ void checkValues()
         int newWaterLevel = measureWater();
         if (CURRENT_NIVEL_AGUA != newWaterLevel)
         {
-            Data_Send.CURRENT_NIVEL_AGUA = CURRENT_NIVEL_AGUA;
             CURRENT_NIVEL_AGUA = newWaterLevel;
+            Data_Send.CURRENT_NIVEL_AGUA = CURRENT_NIVEL_AGUA;
             dataChanged = true;
         }
         lastWaterLevelCheck = millis();
