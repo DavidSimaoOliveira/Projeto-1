@@ -17,6 +17,8 @@ extern lv_obj_t * ui_Temp_Def_Screen;
 extern lv_obj_t * ui_Arc_Def_Temp;
 extern lv_obj_t * ui_Label8;
 extern lv_obj_t * ui_Temp_Desired;
+extern lv_obj_t * ui_Label4;
+extern lv_obj_t * ui_Label12;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -6,6 +6,8 @@
 #include "ui.h"
 
 lv_obj_t * ui_Sistema_Screen = NULL;
+lv_obj_t * ui_Roller_Sistema = NULL;
+lv_obj_t * ui_Label3 = NULL;
 // event funtions
 
 // build funtions
@@ -17,6 +19,26 @@ void ui_Sistema_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Sistema_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Roller_Sistema = lv_roller_create(ui_Sistema_Screen);
+    lv_roller_set_options(ui_Roller_Sistema, "30 sec\n1 min\n5 min\n15 min\n30 min\nNunca", LV_ROLLER_MODE_INFINITE);
+    lv_obj_set_height(ui_Roller_Sistema, 100);
+    lv_obj_set_width(ui_Roller_Sistema, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_align(ui_Roller_Sistema, LV_ALIGN_CENTER);
+    lv_obj_set_style_text_font(ui_Roller_Sistema, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label3 = lv_label_create(ui_Sistema_Screen);
+    lv_obj_set_width(ui_Label3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label3, 0);
+    lv_obj_set_y(ui_Label3, -64);
+    lv_obj_set_align(ui_Label3, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label3, "Quando Suspender");
+    lv_obj_set_style_text_color(ui_Label3, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label3, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Label3, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Label3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
 }
 
 void ui_Sistema_Screen_screen_destroy(void)
@@ -25,5 +47,7 @@ void ui_Sistema_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Sistema_Screen = NULL;
+    ui_Roller_Sistema = NULL;
+    ui_Label3 = NULL;
 
 }

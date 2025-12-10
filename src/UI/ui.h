@@ -31,9 +31,9 @@ extern "C" {
 #include "ui_Def_Screen.h"
 #include "ui_Solo_Screen.h"
 #include "ui_Ar_Screen.h"
-#include "ui_Solo_Def_Screen.h"
+#include "ui_Humidade_Def_Screen.h"
 #include "ui_Temp_Def_Screen.h"
-#include "ui_Luminosidade_Def.h"
+#include "ui_Brilho_Screen.h"
 #include "ui_Sistema_Screen.h"
 
 ///////////////////// VARIABLES ////////////////////

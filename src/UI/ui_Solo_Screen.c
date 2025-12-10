@@ -49,7 +49,7 @@ void ui_Solo_Screen_screen_init(void)
     lv_obj_set_width(ui_Label6, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label6, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Label6, 2);
-    lv_obj_set_y(ui_Label6, -64);
+    lv_obj_set_y(ui_Label6, -71);
     lv_obj_set_align(ui_Label6, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label6, "Humidade Solo");
     lv_obj_set_style_text_color(ui_Label6, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);

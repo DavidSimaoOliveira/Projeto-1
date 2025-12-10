@@ -9,6 +9,8 @@ lv_obj_t * ui_Temp_Def_Screen = NULL;
 lv_obj_t * ui_Arc_Def_Temp = NULL;
 lv_obj_t * ui_Label8 = NULL;
 lv_obj_t * ui_Temp_Desired = NULL;
+lv_obj_t * ui_Label4 = NULL;
+lv_obj_t * ui_Label12 = NULL;
 // event funtions
 
 // build funtions
@@ -23,10 +25,11 @@ void ui_Temp_Def_Screen_screen_init(void)
     ui_Arc_Def_Temp = lv_arc_create(ui_Temp_Def_Screen);
     lv_obj_set_width(ui_Arc_Def_Temp, 112);
     lv_obj_set_height(ui_Arc_Def_Temp, 118);
-    lv_obj_set_x(ui_Arc_Def_Temp, 1);
+    lv_obj_set_x(ui_Arc_Def_Temp, 0);
     lv_obj_set_y(ui_Arc_Def_Temp, 17);
     lv_obj_set_align(ui_Arc_Def_Temp, LV_ALIGN_CENTER);
-    lv_arc_set_value(ui_Arc_Def_Temp, 50);
+    lv_arc_set_range(ui_Arc_Def_Temp, 10, 35);
+    lv_arc_set_value(ui_Arc_Def_Temp, 12);
     lv_obj_set_style_arc_color(ui_Arc_Def_Temp, lv_color_hex(0x5CE0F6), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_arc_opa(ui_Arc_Def_Temp, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -58,6 +61,28 @@ void ui_Temp_Def_Screen_screen_init(void)
     lv_obj_set_style_text_color(ui_Temp_Desired, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Temp_Desired, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Label4 = lv_label_create(ui_Temp_Def_Screen);
+    lv_obj_set_width(ui_Label4, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label4, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label4, -33);
+    lv_obj_set_y(ui_Label4, 61);
+    lv_obj_set_align(ui_Label4, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label4, "10");
+    lv_obj_set_style_text_color(ui_Label4, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label4, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label12 = lv_label_create(ui_Temp_Def_Screen);
+    lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label12, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label12, 33);
+    lv_obj_set_y(ui_Label12, 61);
+    lv_obj_set_align(ui_Label12, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label12, "35");
+    lv_obj_set_style_text_color(ui_Label12, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label12, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label12, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
 }
 
 void ui_Temp_Def_Screen_screen_destroy(void)
@@ -69,5 +94,7 @@ void ui_Temp_Def_Screen_screen_destroy(void)
     ui_Arc_Def_Temp = NULL;
     ui_Label8 = NULL;
     ui_Temp_Desired = NULL;
+    ui_Label4 = NULL;
+    ui_Label12 = NULL;
 
 }

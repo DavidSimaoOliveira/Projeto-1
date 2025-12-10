@@ -6,7 +6,7 @@
 #include "ui.h"
 
 lv_obj_t * ui_Def_Screen = NULL;
-lv_obj_t * ui_Options = NULL;
+lv_obj_t * ui_Roller_Options = NULL;
 lv_obj_t * ui_Label9 = NULL;
 // event funtions
 
@@ -19,17 +19,15 @@ void ui_Def_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Def_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Options = lv_roller_create(ui_Def_Screen);
-    lv_roller_set_options(ui_Options, "Brilho\nHumidade\nTemperatura\nSistema\nSair", LV_ROLLER_MODE_INFINITE);
-    lv_roller_set_selected(ui_Options, 4, LV_ANIM_OFF);
-    lv_obj_set_height(ui_Options, 81);
-    lv_obj_set_width(ui_Options, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_x(ui_Options, 0);
-    lv_obj_set_y(ui_Options, -7);
-    lv_obj_set_align(ui_Options, LV_ALIGN_CENTER);
-    lv_obj_set_style_text_font(ui_Options, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Roller_Options = lv_roller_create(ui_Def_Screen);
+    lv_roller_set_options(ui_Roller_Options, "Brilho\nHumidade\nTemperatura\nSistema\nSair", LV_ROLLER_MODE_INFINITE);
+    lv_roller_set_selected(ui_Roller_Options, 4, LV_ANIM_OFF);
+    lv_obj_set_height(ui_Roller_Options, 100);
+    lv_obj_set_width(ui_Roller_Options, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_align(ui_Roller_Options, LV_ALIGN_CENTER);
+    lv_obj_set_style_text_font(ui_Roller_Options, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_blend_mode(ui_Options, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_blend_mode(ui_Roller_Options, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
     ui_Label9 = lv_label_create(ui_Def_Screen);
     lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
@@ -51,7 +49,7 @@ void ui_Def_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Def_Screen = NULL;
-    ui_Options = NULL;
+    ui_Roller_Options = NULL;
     ui_Label9 = NULL;
 
 }

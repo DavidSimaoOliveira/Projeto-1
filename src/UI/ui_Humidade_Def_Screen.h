@@ -3,17 +3,17 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
-#ifndef UI_SOLO_DEF_SCREEN_H
-#define UI_SOLO_DEF_SCREEN_H
+#ifndef UI_HUMIDADE_DEF_SCREEN_H
+#define UI_HUMIDADE_DEF_SCREEN_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SCREEN: ui_Solo_Def_Screen
-extern void ui_Solo_Def_Screen_screen_init(void);
-extern void ui_Solo_Def_Screen_screen_destroy(void);
-extern lv_obj_t * ui_Solo_Def_Screen;
+// SCREEN: ui_Humidade_Def_Screen
+extern void ui_Humidade_Def_Screen_screen_init(void);
+extern void ui_Humidade_Def_Screen_screen_destroy(void);
+extern lv_obj_t * ui_Humidade_Def_Screen;
 extern lv_obj_t * ui_Arc_Def_Humidade_Solo;
 extern lv_obj_t * ui_Label1;
 extern lv_obj_t * ui_Humidade_Solo_Desired;

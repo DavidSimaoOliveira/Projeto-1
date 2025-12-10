@@ -5,7 +5,7 @@
 
 #include "ui.h"
 
-lv_obj_t * ui_Solo_Def_Screen = NULL;
+lv_obj_t * ui_Humidade_Def_Screen = NULL;
 lv_obj_t * ui_Arc_Def_Humidade_Solo = NULL;
 lv_obj_t * ui_Label1 = NULL;
 lv_obj_t * ui_Humidade_Solo_Desired = NULL;
@@ -13,14 +13,14 @@ lv_obj_t * ui_Humidade_Solo_Desired = NULL;
 
 // build funtions
 
-void ui_Solo_Def_Screen_screen_init(void)
+void ui_Humidade_Def_Screen_screen_init(void)
 {
-    ui_Solo_Def_Screen = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_Solo_Def_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_img_src(ui_Solo_Def_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
+    ui_Humidade_Def_Screen = lv_obj_create(NULL);
+    lv_obj_clear_flag(ui_Humidade_Def_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_img_src(ui_Humidade_Def_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Arc_Def_Humidade_Solo = lv_arc_create(ui_Solo_Def_Screen);
+    ui_Arc_Def_Humidade_Solo = lv_arc_create(ui_Humidade_Def_Screen);
     lv_obj_set_width(ui_Arc_Def_Humidade_Solo, 112);
     lv_obj_set_height(ui_Arc_Def_Humidade_Solo, 118);
     lv_obj_set_x(ui_Arc_Def_Humidade_Solo, 0);
@@ -36,7 +36,7 @@ void ui_Solo_Def_Screen_screen_init(void)
     lv_obj_set_style_bg_color(ui_Arc_Def_Humidade_Solo, lv_color_hex(0x133AE6), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Arc_Def_Humidade_Solo, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
 
-    ui_Label1 = lv_label_create(ui_Solo_Def_Screen);
+    ui_Label1 = lv_label_create(ui_Humidade_Def_Screen);
     lv_obj_set_width(ui_Label1, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label1, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Label1, 0);
@@ -51,7 +51,7 @@ void ui_Solo_Def_Screen_screen_init(void)
     lv_obj_set_style_bg_opa(ui_Label1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Label1, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Humidade_Solo_Desired = lv_label_create(ui_Solo_Def_Screen);
+    ui_Humidade_Solo_Desired = lv_label_create(ui_Humidade_Def_Screen);
     lv_obj_set_width(ui_Humidade_Solo_Desired, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Humidade_Solo_Desired, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Humidade_Solo_Desired, LV_ALIGN_CENTER);
@@ -60,12 +60,12 @@ void ui_Solo_Def_Screen_screen_init(void)
 
 }
 
-void ui_Solo_Def_Screen_screen_destroy(void)
+void ui_Humidade_Def_Screen_screen_destroy(void)
 {
-    if(ui_Solo_Def_Screen) lv_obj_del(ui_Solo_Def_Screen);
+    if(ui_Humidade_Def_Screen) lv_obj_del(ui_Humidade_Def_Screen);
 
     // NULL screen variables
-    ui_Solo_Def_Screen = NULL;
+    ui_Humidade_Def_Screen = NULL;
     ui_Arc_Def_Humidade_Solo = NULL;
     ui_Label1 = NULL;
     ui_Humidade_Solo_Desired = NULL;

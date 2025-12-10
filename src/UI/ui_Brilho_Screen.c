@@ -5,26 +5,27 @@
 
 #include "ui.h"
 
-lv_obj_t * ui_Luminosidade_Def = NULL;
+lv_obj_t * ui_Brilho_Screen = NULL;
 lv_obj_t * ui_Label10 = NULL;
+lv_obj_t * ui_Bar_Brilho = NULL;
 // event funtions
 
 // build funtions
 
-void ui_Luminosidade_Def_screen_init(void)
+void ui_Brilho_Screen_screen_init(void)
 {
-    ui_Luminosidade_Def = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_Luminosidade_Def, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_img_src(ui_Luminosidade_Def, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
+    ui_Brilho_Screen = lv_obj_create(NULL);
+    lv_obj_clear_flag(ui_Brilho_Screen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_img_src(ui_Brilho_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label10 = lv_label_create(ui_Luminosidade_Def);
+    ui_Label10 = lv_label_create(ui_Brilho_Screen);
     lv_obj_set_width(ui_Label10, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label10, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Label10, 0);
     lv_obj_set_y(ui_Label10, -64);
     lv_obj_set_align(ui_Label10, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label10, "Mudar Temp\nDesejada");
+    lv_label_set_text(ui_Label10, "Brilho");
     lv_obj_set_style_text_color(ui_Label10, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label10, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_Label10, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -33,14 +34,22 @@ void ui_Luminosidade_Def_screen_init(void)
     lv_obj_set_style_bg_opa(ui_Label10, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Label10, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Bar_Brilho = lv_bar_create(ui_Brilho_Screen);
+    lv_bar_set_value(ui_Bar_Brilho, 50, LV_ANIM_OFF);
+    lv_bar_set_start_value(ui_Bar_Brilho, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_Bar_Brilho, 40);
+    lv_obj_set_height(ui_Bar_Brilho, 107);
+    lv_obj_set_align(ui_Bar_Brilho, LV_ALIGN_CENTER);
+
 }
 
-void ui_Luminosidade_Def_screen_destroy(void)
+void ui_Brilho_Screen_screen_destroy(void)
 {
-    if(ui_Luminosidade_Def) lv_obj_del(ui_Luminosidade_Def);
+    if(ui_Brilho_Screen) lv_obj_del(ui_Brilho_Screen);
 
     // NULL screen variables
-    ui_Luminosidade_Def = NULL;
+    ui_Brilho_Screen = NULL;
     ui_Label10 = NULL;
+    ui_Bar_Brilho = NULL;
 
 }

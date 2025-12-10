@@ -14,7 +14,7 @@ extern "C" {
 extern void ui_Def_Screen_screen_init(void);
 extern void ui_Def_Screen_screen_destroy(void);
 extern lv_obj_t * ui_Def_Screen;
-extern lv_obj_t * ui_Options;
+extern lv_obj_t * ui_Roller_Options;
 extern lv_obj_t * ui_Label9;
 // CUSTOM VARIABLES
 

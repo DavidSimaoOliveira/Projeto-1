@@ -14,6 +14,8 @@ extern "C" {
 extern void ui_Sistema_Screen_screen_init(void);
 extern void ui_Sistema_Screen_screen_destroy(void);
 extern lv_obj_t * ui_Sistema_Screen;
+extern lv_obj_t * ui_Roller_Sistema;
+extern lv_obj_t * ui_Label3;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

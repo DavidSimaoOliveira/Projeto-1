@@ -3,18 +3,19 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
-#ifndef UI_LUMINOSIDADE_DEF_H
-#define UI_LUMINOSIDADE_DEF_H
+#ifndef UI_BRILHO_SCREEN_H
+#define UI_BRILHO_SCREEN_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SCREEN: ui_Luminosidade_Def
-extern void ui_Luminosidade_Def_screen_init(void);
-extern void ui_Luminosidade_Def_screen_destroy(void);
-extern lv_obj_t * ui_Luminosidade_Def;
+// SCREEN: ui_Brilho_Screen
+extern void ui_Brilho_Screen_screen_init(void);
+extern void ui_Brilho_Screen_screen_destroy(void);
+extern lv_obj_t * ui_Brilho_Screen;
 extern lv_obj_t * ui_Label10;
+extern lv_obj_t * ui_Bar_Brilho;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -13,24 +13,26 @@ DHT sensor(DHTPIN, DHTTYPE);
 #define trigPin 13
 #define echoPin 12
 
-#define MIN_VALUE_HUMIDADE_SOLO 300
-int DESIRED_VALUE_HUMIDADE_SOLO = 0;
+#define MIN_VALUE_HUMIDADE_SOLO 0
+int DESIRED_VALUE_HUMIDADE_SOLO = 75;
 int CURRENT_HUMIDADE_SOLO;
-#define MAX_VALUE_HUMIDADE_SOLO 700
+#define MAX_VALUE_HUMIDADE_SOLO 4000
 
 #define MIN_VALUE_HUMIDADE_AR 0
-int DESIRED_VALUE_HUMIDADE_AR = 0;
 float CURRENT_HUMIDADE_AR;
 #define MAX_VALUE_HUMIDADE_AR 100
 
 #define MIN_VALUE_TEMP_AR 0
-int DESIRED_VALUE_TEMP_AR = 0;
+int DESIRED_VALUE_TEMP_AR = 25;
 float CURRENT_TEMP_AR;
 #define MAX_VALUE_TEMP_AR 40
 
 #define MIN_VALUE_QUANTIDADE_AGUA
 int CURRENT_NIVEL_AGUA;
 #define MAX_VALUE_QUANTIDADE_AGUA
+
+#define Lampada 3
+#define BombaAgua 4
 
 //==============================================================================================================
 // eps now
@@ -226,6 +228,9 @@ void setup()
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
 
+    pinMode(Lampada, OUTPUT);
+    pinMode(BombaAgua, OUTPUT);
+
     // checkValues();
 }
 
@@ -233,6 +238,7 @@ void loop()
 {
 
     checkValues();
+    digitalWrite(BombaAgua, HIGH);
 
     delay(2);
 }
