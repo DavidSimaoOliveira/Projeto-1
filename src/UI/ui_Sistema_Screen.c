@@ -21,7 +21,7 @@ void ui_Sistema_Screen_screen_init(void)
 
     ui_Roller_Sistema = lv_roller_create(ui_Sistema_Screen);
     lv_roller_set_options(ui_Roller_Sistema, "30 sec\n1 min\n5 min\n15 min\n30 min\nNunca", LV_ROLLER_MODE_INFINITE);
-    lv_obj_set_height(ui_Roller_Sistema, 100);
+    lv_obj_set_height(ui_Roller_Sistema, 86);
     lv_obj_set_width(ui_Roller_Sistema, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align(ui_Roller_Sistema, LV_ALIGN_CENTER);
     lv_obj_set_style_text_font(ui_Roller_Sistema, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);

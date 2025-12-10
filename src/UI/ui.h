@@ -47,6 +47,8 @@ extern lv_obj_t * ui____initial_actions0;
 LV_IMG_DECLARE(
     ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png);    // assets/Gemini_Generated_Image_fo8hn8fo8hn8fo8h_129x160.png
 LV_IMG_DECLARE(ui_img_drop_png);    // assets/drop.png
+LV_IMG_DECLARE(ui_img_1515518950);    // assets/wifi (1).png
+LV_IMG_DECLARE(ui_img_1936584166);    // assets/wifi-slash (1).png
 
 // UI INIT
 void ui_init(void);

@@ -22,7 +22,7 @@
 #define MIN_VALUE_TEMP_AR 0
 #define MAX_VALUE_TEMP_AR 40
 
-int DESIRED_HUMIDADE_SOLO = 0;
+int DESIRED_HUMIDADE_SOLO = 70;
 int DESIRED_TEMP_AR = 25;
 int Luminosidade = 100;
 
@@ -46,6 +46,8 @@ const unsigned long UPDATE_INTERVAL = 2000;
 unsigned long lastButtonPress = 0;
 unsigned long lastAnimUpdate = 0;
 bool isScreenOff = false;
+
+bool Connected;
 
 typedef enum
 {
@@ -96,6 +98,7 @@ typedef struct
 } Message_Received;
 
 Message_Received Data_received;
+Message_Sent Data_Sent;
 esp_now_peer_info_t peerInfo;
 
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -207,11 +210,36 @@ void update_ScreenValues()
     msg.toCharArray(mensagem_A, sizeof(mensagem_A));
     lv_label_set_text(ui_Temp_Desired, mensagem_A);
     lv_arc_set_value(ui_Arc_Def_Temp, DESIRED_TEMP_AR);
+
+    if (Connected)
+    {
+        msg = "Connected";
+        msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+        lv_label_set_text(ui_Connection_Text, mensagem_A);
+        lv_obj_clear_flag(ui_Connection_Image, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_No_Connection_Image, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        msg = "Connection Failed";
+        msg.toCharArray(mensagem_A, sizeof(mensagem_A));
+        lv_label_set_text(ui_Connection_Text, mensagem_A);
+        lv_obj_add_flag(ui_Connection_Image, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_No_Connection_Image, LV_OBJ_FLAG_HIDDEN);
+    }
 }
+
+#define CONNECTION_TIMEOUT 15000
 
 void update_Screen()
 {
     bool wokeUpNow = false;
+    bool desiredChanged = false;
+
+    if (millis() - lastDataTime > CONNECTION_TIMEOUT)
+    {
+        Connected = false;
+    }
 
     if (digitalRead(BUTTON_1) == LOW || digitalRead(BUTTON_2) == LOW || digitalRead(BUTTON_3) == LOW)
     {
@@ -275,6 +303,11 @@ void update_Screen()
                 {
                     DESIRED_TEMP_AR = 0;
                 }
+                if (DESIRED_TEMP_AR != Data_Sent.DESIRED_TEMP)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_TEMP = DESIRED_TEMP_AR;
+                }
             }
             else if (currentEcra == Humidade)
             {
@@ -282,6 +315,11 @@ void update_Screen()
                 if (DESIRED_HUMIDADE_SOLO < 0)
                 {
                     DESIRED_HUMIDADE_SOLO = 0;
+                }
+                if (DESIRED_HUMIDADE_SOLO != Data_Sent.DESIRED_HUMI_SOLO)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_HUMI_SOLO = DESIRED_HUMIDADE_SOLO;
                 }
             }
             else if (currentEcra == Sistema)
@@ -329,6 +367,11 @@ void update_Screen()
                 {
                     DESIRED_TEMP_AR = 100;
                 }
+                if (DESIRED_TEMP_AR != Data_Sent.DESIRED_TEMP)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_TEMP = DESIRED_TEMP_AR;
+                }
             }
             else if (currentEcra == Humidade)
             {
@@ -336,6 +379,11 @@ void update_Screen()
                 if (DESIRED_HUMIDADE_SOLO > 100)
                 {
                     DESIRED_HUMIDADE_SOLO = 100;
+                }
+                if (DESIRED_HUMIDADE_SOLO != Data_Sent.DESIRED_HUMI_SOLO)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_HUMI_SOLO = DESIRED_HUMIDADE_SOLO;
                 }
             }
             else if (currentEcra == Sistema)
@@ -441,14 +489,16 @@ void update_Screen()
 
         currentEcra = targetEcra;
     }
+    if (desiredChanged)
+    {
+        esp_now_send(estufa, (uint8_t *)&Data_Sent, sizeof(Data_Sent));
+        desiredChanged = false;
+    }
 }
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    Serial.print("\r\nStatus do envio: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Sucesso" : "Falha");
 }
-
 void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingData, int len)
 {
     memcpy(&Data_received, incomingData, sizeof(Data_received));
@@ -464,6 +514,7 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
     TARGET_NIVEL_AGUA = Data_received.CURRENT_NIVEL_AGUA;
 
     lastDataTime = millis();
+    Connected = true;
 }
 
 void designRollerDef()

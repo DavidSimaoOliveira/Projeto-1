@@ -126,7 +126,7 @@ int measureWater()
         quantidade = 0;
     }
 
-    return 100 - quantidade;
+    return distance;
 }
 
 int lastSoloCheck = millis();
@@ -137,6 +137,12 @@ int lastAirCheck = millis();
 #define AirCheckIntervalo 2000
 int lastWaterLevelCheck = millis();
 #define WaterLevelCheckIntervalo 2000
+
+int estadoLampada = LOW;
+
+bool bombaOn = false;
+int startedBomba = millis();
+int lastBombaOn = millis();
 
 void checkValues()
 {
@@ -201,6 +207,40 @@ void checkValues()
     {
         esp_now_send(display, (uint8_t *)&Data_Send, sizeof(Data_Send));
     }
+
+    if (CURRENT_TEMP_AR < DESIRED_VALUE_TEMP_AR - (DESIRED_VALUE_TEMP_AR * 0.10) && estadoLampada == LOW)
+    {
+        digitalWrite(Lampada, HIGH);
+        estadoLampada = HIGH;
+    }
+    else if (CURRENT_TEMP_AR > DESIRED_VALUE_TEMP_AR + (DESIRED_VALUE_TEMP_AR * 0.10) && estadoLampada == HIGH)
+    {
+        digitalWrite(Lampada, LOW);
+        estadoLampada = LOW;
+    }
+
+    if (!bombaOn)
+    {
+        if (CURRENT_HUMIDADE_SOLO < DESIRED_VALUE_HUMIDADE_SOLO - (DESIRED_VALUE_HUMIDADE_SOLO * 0.10) &&
+            (millis() - lastBombaOn > 180000))
+        {
+            bombaOn = true;
+            digitalWrite(BombaAgua, HIGH);
+
+            startedBomba = millis();
+        }
+    }
+    else
+    {
+
+        if (millis() - startedBomba > 3000)
+        {
+            bombaOn = false;
+            digitalWrite(BombaAgua, LOW);
+
+            lastBombaOn = millis();
+        }
+    }
 }
 
 void setup()
@@ -238,7 +278,6 @@ void loop()
 {
 
     checkValues();
-    digitalWrite(BombaAgua, HIGH);
 
     delay(2);
 }

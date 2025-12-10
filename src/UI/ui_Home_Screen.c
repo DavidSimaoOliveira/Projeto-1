@@ -9,6 +9,9 @@ lv_obj_t * ui_Home_Screen = NULL;
 lv_obj_t * ui_Image1 = NULL;
 lv_obj_t * ui_Label11 = NULL;
 lv_obj_t * ui_Nivel_Agua = NULL;
+lv_obj_t * ui_Connection_Image = NULL;
+lv_obj_t * ui_Connection_Text = NULL;
+lv_obj_t * ui_No_Connection_Image = NULL;
 // event funtions
 
 // build funtions
@@ -55,6 +58,38 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_set_style_radius(ui_Nivel_Agua, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_blend_mode(ui_Nivel_Agua, LV_BLEND_MODE_NORMAL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Connection_Image = lv_img_create(ui_Home_Screen);
+    lv_img_set_src(ui_Connection_Image, &ui_img_1515518950);
+    lv_obj_set_width(ui_Connection_Image, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Connection_Image, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Connection_Image, -53);
+    lv_obj_set_y(ui_Connection_Image, 70);
+    lv_obj_set_align(ui_Connection_Image, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Connection_Image, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Connection_Image, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_Connection_Text = lv_label_create(ui_Home_Screen);
+    lv_obj_set_width(ui_Connection_Text, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Connection_Text, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Connection_Text, -22);
+    lv_obj_set_y(ui_Connection_Text, 74);
+    lv_obj_set_align(ui_Connection_Text, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Connection_Text, "Connected");
+    lv_obj_set_style_text_color(ui_Connection_Text, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Connection_Text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Connection_Text, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Connection_Text, &lv_font_montserrat_8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_No_Connection_Image = lv_img_create(ui_Home_Screen);
+    lv_img_set_src(ui_No_Connection_Image, &ui_img_1936584166);
+    lv_obj_set_width(ui_No_Connection_Image, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_No_Connection_Image, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_No_Connection_Image, -53);
+    lv_obj_set_y(ui_No_Connection_Image, 70);
+    lv_obj_set_align(ui_No_Connection_Image, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_No_Connection_Image, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_No_Connection_Image, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
 }
 
 void ui_Home_Screen_screen_destroy(void)
@@ -66,5 +101,8 @@ void ui_Home_Screen_screen_destroy(void)
     ui_Image1 = NULL;
     ui_Label11 = NULL;
     ui_Nivel_Agua = NULL;
+    ui_Connection_Image = NULL;
+    ui_Connection_Text = NULL;
+    ui_No_Connection_Image = NULL;
 
 }
