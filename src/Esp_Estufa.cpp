@@ -34,6 +34,11 @@ int CURRENT_NIVEL_AGUA;
 #define Lampada 3
 #define BombaAgua 4
 
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 //==============================================================================================================
 // eps now
 
@@ -100,10 +105,10 @@ int measureHumidadeAr()
     return resultado;
 }
 
-int measureWater()
+double measureWater()
 {
-    long duration, distance;
-    int quantidade = 0;
+    double duration, distance;
+    double quantidade = 0;
 
     // Send pulse
     digitalWrite(trigPin, LOW);
@@ -116,7 +121,7 @@ int measureWater()
     // Compute distance
     distance = duration / 58;
 
-    quantidade = map(distance, 0, 300, 0, 100);
+    quantidade = mapFloat(distance, 0, 300, 0, 100);
     if (quantidade >= 100)
     {
         quantidade = 100;
