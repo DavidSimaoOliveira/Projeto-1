@@ -6,12 +6,12 @@
 #include "ui.h"
 
 lv_obj_t * ui_Home_Screen = NULL;
-lv_obj_t * ui_Image1 = NULL;
+lv_obj_t * ui_Water = NULL;
 lv_obj_t * ui_Label11 = NULL;
-lv_obj_t * ui_Nivel_Agua = NULL;
 lv_obj_t * ui_Connection_Image = NULL;
 lv_obj_t * ui_Connection_Text = NULL;
 lv_obj_t * ui_No_Connection_Image = NULL;
+lv_obj_t * ui_No_Water = NULL;
 // event funtions
 
 // build funtions
@@ -23,15 +23,15 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_set_style_bg_img_src(ui_Home_Screen, &ui_img_gemini_generated_image_fo8hn8fo8hn8fo8h_129x160_png,
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Image1 = lv_img_create(ui_Home_Screen);
-    lv_img_set_src(ui_Image1, &ui_img_drop_png);
-    lv_obj_set_width(ui_Image1, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Image1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Image1, 52);
-    lv_obj_set_y(ui_Image1, -68);
-    lv_obj_set_align(ui_Image1, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_Water = lv_img_create(ui_Home_Screen);
+    lv_img_set_src(ui_Water, &ui_img_drop_png);
+    lv_obj_set_width(ui_Water, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Water, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Water, 52);
+    lv_obj_set_y(ui_Water, -68);
+    lv_obj_set_align(ui_Water, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Water, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Water, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_Label11 = lv_label_create(ui_Home_Screen);
     lv_obj_set_width(ui_Label11, LV_SIZE_CONTENT);   /// 1
@@ -43,20 +43,6 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_set_style_text_color(ui_Label11, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label11, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Label11, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_Nivel_Agua = lv_label_create(ui_Home_Screen);
-    lv_obj_set_width(ui_Nivel_Agua, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Nivel_Agua, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Nivel_Agua, 30);
-    lv_obj_set_y(ui_Nivel_Agua, -68);
-    lv_obj_set_align(ui_Nivel_Agua, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Nivel_Agua, "100%");
-    lv_obj_set_style_text_color(ui_Nivel_Agua, lv_color_hex(0x232323), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Nivel_Agua, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_Nivel_Agua, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Nivel_Agua, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(ui_Nivel_Agua, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_blend_mode(ui_Nivel_Agua, LV_BLEND_MODE_NORMAL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Connection_Image = lv_img_create(ui_Home_Screen);
     lv_img_set_src(ui_Connection_Image, &ui_img_1515518950);
@@ -71,8 +57,8 @@ void ui_Home_Screen_screen_init(void)
     ui_Connection_Text = lv_label_create(ui_Home_Screen);
     lv_obj_set_width(ui_Connection_Text, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Connection_Text, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Connection_Text, -22);
-    lv_obj_set_y(ui_Connection_Text, 74);
+    lv_obj_set_x(ui_Connection_Text, -12);
+    lv_obj_set_y(ui_Connection_Text, 72);
     lv_obj_set_align(ui_Connection_Text, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Connection_Text, "Connected");
     lv_obj_set_style_text_color(ui_Connection_Text, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -90,6 +76,16 @@ void ui_Home_Screen_screen_init(void)
     lv_obj_add_flag(ui_No_Connection_Image, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_No_Connection_Image, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
+    ui_No_Water = lv_img_create(ui_Home_Screen);
+    lv_img_set_src(ui_No_Water, &ui_img_562263176);
+    lv_obj_set_width(ui_No_Water, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_No_Water, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_No_Water, 52);
+    lv_obj_set_y(ui_No_Water, -68);
+    lv_obj_set_align(ui_No_Water, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_No_Water, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_No_Water, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
 }
 
 void ui_Home_Screen_screen_destroy(void)
@@ -98,11 +94,11 @@ void ui_Home_Screen_screen_destroy(void)
 
     // NULL screen variables
     ui_Home_Screen = NULL;
-    ui_Image1 = NULL;
+    ui_Water = NULL;
     ui_Label11 = NULL;
-    ui_Nivel_Agua = NULL;
     ui_Connection_Image = NULL;
     ui_Connection_Text = NULL;
     ui_No_Connection_Image = NULL;
+    ui_No_Water = NULL;
 
 }

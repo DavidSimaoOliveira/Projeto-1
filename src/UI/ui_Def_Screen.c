@@ -20,7 +20,7 @@ void ui_Def_Screen_screen_init(void)
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Roller_Options = lv_roller_create(ui_Def_Screen);
-    lv_roller_set_options(ui_Roller_Options, "Brilho\nHumidade\nTemperatura\nSistema\nSair", LV_ROLLER_MODE_INFINITE);
+    lv_roller_set_options(ui_Roller_Options, "Temperatura\nHumidade\nBrilho\nSistema\nSair", LV_ROLLER_MODE_INFINITE);
     lv_roller_set_selected(ui_Roller_Options, 4, LV_ANIM_OFF);
     lv_obj_set_height(ui_Roller_Options, 100);
     lv_obj_set_width(ui_Roller_Options, LV_SIZE_CONTENT);   /// 1
@@ -32,7 +32,7 @@ void ui_Def_Screen_screen_init(void)
     ui_Label9 = lv_label_create(ui_Def_Screen);
     lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label9, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label9, 1);
+    lv_obj_set_x(ui_Label9, 0);
     lv_obj_set_y(ui_Label9, -66);
     lv_obj_set_align(ui_Label9, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label9, "Definicoes");

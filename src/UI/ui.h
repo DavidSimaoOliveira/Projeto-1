@@ -49,6 +49,7 @@ LV_IMG_DECLARE(
 LV_IMG_DECLARE(ui_img_drop_png);    // assets/drop.png
 LV_IMG_DECLARE(ui_img_1515518950);    // assets/wifi (1).png
 LV_IMG_DECLARE(ui_img_1936584166);    // assets/wifi-slash (1).png
+LV_IMG_DECLARE(ui_img_562263176);    // assets/no-water.png
 
 // UI INIT
 void ui_init(void);

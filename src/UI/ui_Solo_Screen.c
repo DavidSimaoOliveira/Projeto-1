@@ -48,7 +48,7 @@ void ui_Solo_Screen_screen_init(void)
     ui_Label6 = lv_label_create(ui_Solo_Screen);
     lv_obj_set_width(ui_Label6, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label6, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label6, 2);
+    lv_obj_set_x(ui_Label6, 0);
     lv_obj_set_y(ui_Label6, -71);
     lv_obj_set_align(ui_Label6, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label6, "Humidade Solo");

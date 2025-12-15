@@ -8,15 +8,15 @@
 
 DHT sensor(DHTPIN, DHTTYPE);
 
-#define Sensor_Solo 2
+#define Sensor_Solo 5
 
-#define trigPin 13
-#define echoPin 12
+#define PinSensor_NivelAgua 20
+#define PinSensor_TestaAgua 21
 
 #define MIN_VALUE_HUMIDADE_SOLO 0
 int DESIRED_VALUE_HUMIDADE_SOLO = 75;
 int CURRENT_HUMIDADE_SOLO;
-#define MAX_VALUE_HUMIDADE_SOLO 4000
+#define MAX_VALUE_HUMIDADE_SOLO 3000
 
 #define MIN_VALUE_HUMIDADE_AR 0
 float CURRENT_HUMIDADE_AR;
@@ -27,18 +27,13 @@ int DESIRED_VALUE_TEMP_AR = 25;
 float CURRENT_TEMP_AR;
 #define MAX_VALUE_TEMP_AR 40
 
-#define MIN_VALUE_QUANTIDADE_AGUA
-int CURRENT_NIVEL_AGUA;
-#define MAX_VALUE_QUANTIDADE_AGUA
+bool ENOUGH_AGUA;
 
 #define Lampada 3
 #define BombaAgua 4
 
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
-{
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
+int lastTempCheck = millis();
+int lastSoloCheck = millis();
 //==============================================================================================================
 // eps now
 
@@ -55,7 +50,7 @@ typedef struct
     float CURRENT_TEMP_AR;
     int CURRENT_HUMI_AR;
     int CURRENT_HUMI_SOLO;
-    int CURRENT_NIVEL_AGUA;
+    bool EnoughAgua;
 } Message_Sent;
 
 Message_Received Data_Received;
@@ -72,8 +67,12 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
 
     DESIRED_VALUE_HUMIDADE_SOLO = Data_Received.DESIRED_HUMI_SOLO;
     DESIRED_VALUE_TEMP_AR = Data_Received.DESIRED_TEMP;
+
+    lastSoloCheck = 0;
+    lastTempCheck = 0;
 }
 //=========================================================================================================
+
 int measureHumidadeSolo()
 {
     int value = analogRead(Sensor_Solo);
@@ -105,38 +104,8 @@ int measureHumidadeAr()
     return resultado;
 }
 
-double measureWater()
-{
-    double duration, distance;
-    double quantidade = 0;
-
-    // Send pulse
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-    // Wait for echo and measure time until it happens
-    duration = pulseIn(echoPin, HIGH);
-    // Compute distance
-    distance = duration / 58;
-
-    quantidade = mapFloat(distance, 0, 300, 0, 100);
-    if (quantidade >= 100)
-    {
-        quantidade = 100;
-    }
-    else if (quantidade < 0)
-    {
-        quantidade = 0;
-    }
-
-    return distance;
-}
-
-int lastSoloCheck = millis();
 #define SoloCheckIntervalo 2000
-int lastTempCheck = millis();
+
 #define TempCheckIntervalo 2000
 int lastAirCheck = millis();
 #define AirCheckIntervalo 2000
@@ -148,6 +117,12 @@ int estadoLampada = LOW;
 bool bombaOn = false;
 int startedBomba = millis();
 int lastBombaOn = millis();
+
+int lastMessage = millis();
+bool firstMessage = true;
+
+#define TEMP_HISTERESIS 1.0 // 1°C
+#define HUMI_HISTERESIS 5   // 5%
 
 void checkValues()
 {
@@ -196,29 +171,17 @@ void checkValues()
         lastTempCheck = millis();
     }
 
-    if (millis() - lastWaterLevelCheck >= WaterLevelCheckIntervalo)
-    {
-        int newWaterLevel = measureWater();
-        if (CURRENT_NIVEL_AGUA != newWaterLevel)
-        {
-            CURRENT_NIVEL_AGUA = newWaterLevel;
-            Data_Send.CURRENT_NIVEL_AGUA = CURRENT_NIVEL_AGUA;
-            dataChanged = true;
-        }
-        lastWaterLevelCheck = millis();
-    }
-
     if (dataChanged)
     {
         esp_now_send(display, (uint8_t *)&Data_Send, sizeof(Data_Send));
     }
 
-    if (CURRENT_TEMP_AR < DESIRED_VALUE_TEMP_AR - (DESIRED_VALUE_TEMP_AR * 0.10) && estadoLampada == LOW)
+    if (CURRENT_TEMP_AR < DESIRED_VALUE_TEMP_AR - TEMP_HISTERESIS)
     {
         digitalWrite(Lampada, HIGH);
         estadoLampada = HIGH;
     }
-    else if (CURRENT_TEMP_AR > DESIRED_VALUE_TEMP_AR + (DESIRED_VALUE_TEMP_AR * 0.10) && estadoLampada == HIGH)
+    else if (CURRENT_TEMP_AR >= DESIRED_VALUE_TEMP_AR)
     {
         digitalWrite(Lampada, LOW);
         estadoLampada = LOW;
@@ -226,8 +189,7 @@ void checkValues()
 
     if (!bombaOn)
     {
-        if (CURRENT_HUMIDADE_SOLO < DESIRED_VALUE_HUMIDADE_SOLO - (DESIRED_VALUE_HUMIDADE_SOLO * 0.10) &&
-            (millis() - lastBombaOn > 180000))
+        if (CURRENT_HUMIDADE_SOLO < DESIRED_VALUE_HUMIDADE_SOLO - HUMI_HISTERESIS && (millis() - lastBombaOn > 180000))
         {
             bombaOn = true;
             digitalWrite(BombaAgua, HIGH);
@@ -237,13 +199,15 @@ void checkValues()
     }
     else
     {
-
-        if (millis() - startedBomba > 3000)
+        if (millis() - startedBomba > 1500)
         {
             bombaOn = false;
             digitalWrite(BombaAgua, LOW);
 
             lastBombaOn = millis();
+
+            ENOUGH_AGUA = digitalRead(PinSensor_NivelAgua) == LOW;
+            Data_Send.EnoughAgua = ENOUGH_AGUA;
         }
     }
 }
@@ -258,10 +222,9 @@ void setup()
 
     memset(&peerInfo, 0, sizeof(peerInfo));
 
-    // Configura o Peer
     memcpy(peerInfo.peer_addr, display, 6);
     peerInfo.channel = 0;
-    peerInfo.encrypt = false; // Sem encriptação para teste inicial
+    peerInfo.encrypt = false;
 
     esp_now_add_peer(&peerInfo);
 
@@ -270,19 +233,21 @@ void setup()
 
     pinMode(Sensor_Solo, INPUT);
 
-    pinMode(trigPin, OUTPUT);
-    pinMode(echoPin, INPUT);
-
     pinMode(Lampada, OUTPUT);
     pinMode(BombaAgua, OUTPUT);
 
-    // checkValues();
+    pinMode(PinSensor_NivelAgua, INPUT_PULLUP);
+    pinMode(PinSensor_TestaAgua, OUTPUT);
+
+    digitalWrite(PinSensor_TestaAgua, HIGH);
+    delayMicroseconds(10);
+    ENOUGH_AGUA = digitalRead(PinSensor_NivelAgua) == LOW;
+    Data_Send.EnoughAgua = ENOUGH_AGUA;
 }
 
 void loop()
 {
 
     checkValues();
-
     delay(2);
 }

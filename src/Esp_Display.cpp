@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <esp_now.h>
 #include "LGFX_config.h"
+#include <Preferences.h>
 
 #include "UI/ui.h"
 
@@ -12,6 +13,7 @@
 #define BUTTON_3 15
 #define PINO_LITE 12
 #define DEBOUNCE_DELAY 400
+// #define NIVEL_AGUA ...
 
 #define MIN_VALUE_HUMIDADE_SOLO 300
 #define MAX_VALUE_HUMIDADE_SOLO 700
@@ -34,12 +36,10 @@ int TARGET_NIVEL_AGUA = 0;
 float DISP_HUMIDADE_SOLO = 0;
 float DISP_HUMIDADE_AR = 0;
 float DISP_TEMP_AR = 0;
-float DISP_NIVEL_AGUA = 0;
 
 float START_HUMIDADE_SOLO = 0;
 float START_HUMIDADE_AR = 0;
 float START_TEMP_AR = 0;
-float START_NIVEL_AGUA = 0;
 
 unsigned long lastDataTime = 0;
 const unsigned long UPDATE_INTERVAL = 2000;
@@ -48,6 +48,9 @@ unsigned long lastAnimUpdate = 0;
 bool isScreenOff = false;
 
 bool Connected;
+bool EnoughWater;
+
+Preferences desired;
 
 typedef enum
 {
@@ -94,7 +97,7 @@ typedef struct
     float CURRENT_TEMP_AR;
     int CURRENT_HUMI_AR;
     int CURRENT_HUMI_SOLO;
-    int CURRENT_NIVEL_AGUA;
+    bool EnoughWater;
 } Message_Received;
 
 Message_Received Data_received;
@@ -190,12 +193,6 @@ void update_ScreenValues()
     lv_label_set_text(ui_Temp_Ar, mensagem_A);
     lv_bar_set_value(ui_Bar_Temp, measureTempAr(), LV_ANIM_OFF);
 
-    // Nível Água
-    DISP_NIVEL_AGUA = START_NIVEL_AGUA + ((TARGET_NIVEL_AGUA - START_NIVEL_AGUA) * progress);
-    msg = String(DISP_NIVEL_AGUA, 0) + "%";
-    msg.toCharArray(mensagem_A, sizeof(mensagem_A));
-    lv_label_set_text(ui_Nivel_Agua, mensagem_A);
-
     // Brilho
     lv_slider_set_value(ui_Bar_Brilho, Luminosidade, LV_ANIM_ON);
 
@@ -210,6 +207,17 @@ void update_ScreenValues()
     msg.toCharArray(mensagem_A, sizeof(mensagem_A));
     lv_label_set_text(ui_Temp_Desired, mensagem_A);
     lv_arc_set_value(ui_Arc_Def_Temp, DESIRED_TEMP_AR);
+
+    if (EnoughWater)
+    {
+        lv_obj_clear_flag(ui_Water, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_No_Water, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_clear_flag(ui_No_Water, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_Water, LV_OBJ_FLAG_HIDDEN);
+    }
 
     if (Connected)
     {
@@ -303,11 +311,6 @@ void update_Screen()
                 {
                     DESIRED_TEMP_AR = 0;
                 }
-                if (DESIRED_TEMP_AR != Data_Sent.DESIRED_TEMP)
-                {
-                    desiredChanged = true;
-                    Data_Sent.DESIRED_TEMP = DESIRED_TEMP_AR;
-                }
             }
             else if (currentEcra == Humidade)
             {
@@ -315,11 +318,6 @@ void update_Screen()
                 if (DESIRED_HUMIDADE_SOLO < 0)
                 {
                     DESIRED_HUMIDADE_SOLO = 0;
-                }
-                if (DESIRED_HUMIDADE_SOLO != Data_Sent.DESIRED_HUMI_SOLO)
-                {
-                    desiredChanged = true;
-                    Data_Sent.DESIRED_HUMI_SOLO = DESIRED_HUMIDADE_SOLO;
                 }
             }
             else if (currentEcra == Sistema)
@@ -367,11 +365,6 @@ void update_Screen()
                 {
                     DESIRED_TEMP_AR = 100;
                 }
-                if (DESIRED_TEMP_AR != Data_Sent.DESIRED_TEMP)
-                {
-                    desiredChanged = true;
-                    Data_Sent.DESIRED_TEMP = DESIRED_TEMP_AR;
-                }
             }
             else if (currentEcra == Humidade)
             {
@@ -379,11 +372,6 @@ void update_Screen()
                 if (DESIRED_HUMIDADE_SOLO > 100)
                 {
                     DESIRED_HUMIDADE_SOLO = 100;
-                }
-                if (DESIRED_HUMIDADE_SOLO != Data_Sent.DESIRED_HUMI_SOLO)
-                {
-                    desiredChanged = true;
-                    Data_Sent.DESIRED_HUMI_SOLO = DESIRED_HUMIDADE_SOLO;
                 }
             }
             else if (currentEcra == Sistema)
@@ -414,13 +402,13 @@ void update_Screen()
                 switch (opcao)
                 {
                 case 0:
-                    targetEcra = Brilho;
+                    targetEcra = Temperatura;
                     break;
                 case 1:
                     targetEcra = Humidade;
                     break;
                 case 2:
-                    targetEcra = Temperatura;
+                    targetEcra = Brilho;
                     break;
                 case 3:
                     targetEcra = Sistema;
@@ -433,13 +421,37 @@ void update_Screen()
             else if (currentEcra == Home)
                 targetEcra = Def;
             else if (currentEcra == Brilho)
+            {
+                desired.putInt("Brilho", Luminosidade);
                 targetEcra = Def;
+            }
             else if (currentEcra == Temperatura)
+            {
+                if (DESIRED_TEMP_AR != Data_Sent.DESIRED_TEMP)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_TEMP = DESIRED_TEMP_AR;
+                    desired.putInt("Temp Ar", DESIRED_TEMP_AR);
+                }
+
                 targetEcra = Def;
+            }
             else if (currentEcra == Humidade)
+            {
+                if (DESIRED_HUMIDADE_SOLO != Data_Sent.DESIRED_HUMI_SOLO)
+                {
+                    desiredChanged = true;
+                    Data_Sent.DESIRED_HUMI_SOLO = DESIRED_HUMIDADE_SOLO;
+                    desired.putInt("Humidade Solo", DESIRED_HUMIDADE_SOLO);
+                }
+
                 targetEcra = Def;
+            }
             else if (currentEcra == Sistema)
+            {
+                desired.putInt("Sistema", (int)ecra_setting);
                 targetEcra = Def;
+            }
         }
     }
 
@@ -506,12 +518,10 @@ void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incoming
     START_HUMIDADE_AR = DISP_HUMIDADE_AR;
     START_HUMIDADE_SOLO = DISP_HUMIDADE_SOLO;
     START_TEMP_AR = DISP_TEMP_AR;
-    START_NIVEL_AGUA = DISP_NIVEL_AGUA;
 
     TARGET_HUMIDADE_AR = Data_received.CURRENT_HUMI_AR;
     TARGET_HUMIDADE_SOLO = Data_received.CURRENT_HUMI_SOLO;
     TARGET_TEMP_AR = Data_received.CURRENT_TEMP_AR;
-    TARGET_NIVEL_AGUA = Data_received.CURRENT_NIVEL_AGUA;
 
     lastDataTime = millis();
     Connected = true;
@@ -601,6 +611,18 @@ void setup()
     pinMode(BUTTON_2, INPUT_PULLUP);
     pinMode(BUTTON_3, INPUT_PULLUP);
     pinMode(PINO_LITE, OUTPUT);
+
+    desired.begin("DESIRED_VALUES", false);
+
+    DESIRED_HUMIDADE_SOLO = desired.getInt("Humidade Solo", DESIRED_HUMIDADE_SOLO);
+
+    DESIRED_TEMP_AR = desired.getInt("Temp Ar", DESIRED_TEMP_AR);
+
+    ecra_setting = (SistemaStates)desired.getInt("Sistema", (int)ecra_setting);
+    lv_roller_set_selected(ui_Roller_Sistema, int(ecra_setting), LV_ANIM_ON);
+
+    Luminosidade = desired.getInt("Brilho", Luminosidade);
+    lv_slider_set_value(ui_Bar_Brilho, Luminosidade, LV_ANIM_ON);
 }
 
 void loop()

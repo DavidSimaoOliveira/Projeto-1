@@ -14,12 +14,12 @@ extern "C" {
 extern void ui_Home_Screen_screen_init(void);
 extern void ui_Home_Screen_screen_destroy(void);
 extern lv_obj_t * ui_Home_Screen;
-extern lv_obj_t * ui_Image1;
+extern lv_obj_t * ui_Water;
 extern lv_obj_t * ui_Label11;
-extern lv_obj_t * ui_Nivel_Agua;
 extern lv_obj_t * ui_Connection_Image;
 extern lv_obj_t * ui_Connection_Text;
 extern lv_obj_t * ui_No_Connection_Image;
+extern lv_obj_t * ui_No_Water;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus
